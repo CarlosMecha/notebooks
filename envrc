@@ -1,0 +1,10 @@
+
+# Base
+source ~/.bashrc
+
+# Aliases
+
+alias db-dev='psql -h localhost -U notebooks notebooks';
+
+export SERVER=cloud.cmecha.com
+
