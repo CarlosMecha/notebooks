@@ -1,4 +1,4 @@
-package com.carlosmecha.notebooks.categories;
+package com.carlosmecha.notebooks.tags;
 
 import com.carlosmecha.notebooks.notebooks.Notebook;
 import org.hibernate.validator.constraints.NotEmpty;
@@ -7,14 +7,14 @@ import javax.persistence.*;
 import java.util.Date;
 
 /**
- * Category model.
+ * Tag model.
  *
  * Created by Carlos on 12/25/16.
  */
 @Entity
-@Table(name = "categories",
+@Table(name = "tags",
     uniqueConstraints = @UniqueConstraint(columnNames = {"code", "notebook_code"}))
-public class Category {
+public class Tag {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,25 +27,18 @@ public class Category {
     @JoinColumn(name = "notebook_code", nullable = false, updatable = false)
     private Notebook notebook;
 
-    @NotEmpty
-    private String name;
     private Date createdOn;
 
-    public Category() {
+    public Tag() {
     }
 
-    public Category(String name) {
-        this(nameToCode(name), name);
+    public Tag(String code) {
+        this(code, new Date());
     }
 
-    public Category(String code, String name) {
-        this(code, name, new Date());
-    }
-
-    public Category(String code, String name, Date createdOn) {
+    public Tag(String code, Date createdOn) {
         this();
         this.code = code;
-        this.name = name;
         this.createdOn = createdOn;
     }
 
@@ -65,21 +58,12 @@ public class Category {
         this.notebook = notebook;
     }
 
-
     public String getCode() {
         return code;
     }
 
     public void setCode(String code) {
         this.code = code;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public Date getCreatedOn() {
@@ -92,11 +76,7 @@ public class Category {
 
     @Override
     public String toString() {
-        return String.format("Category %s: %s", code, name);
+        return code;
     }
 
-    private static String nameToCode(String name) {
-        String normalized = name.toLowerCase();
-        return normalized.replaceAll("(\\s|\\.|_|-)", "");
-    }
 }
