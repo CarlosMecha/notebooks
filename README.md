@@ -30,4 +30,5 @@ docker run --name database -p '5432:5432' -e POSTGRES_PASSWORD=mypass -e POSTGRE
  
 ```cron
 0 10 * * * /bin/bash backup.sh
+0 0 * * 1 /bin/bash compress.sh
 ```
