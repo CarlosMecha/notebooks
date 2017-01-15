@@ -1,6 +1,7 @@
 package com.carlosmecha.notebooks.notebooks;
 
 import com.carlosmecha.notebooks.users.User;
+import com.carlosmecha.notebooks.utils.StringUtils;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.persistence.*;
@@ -29,19 +30,20 @@ public class Notebook {
     public Notebook() {
     }
 
-    public Notebook(String name) {
-        this(nameToCode(name), name);
+    public Notebook(String name, User createdBy) {
+        this(StringUtils.nameToCode(name), name, createdBy);
     }
 
-    public Notebook(String code, String name) {
-        this(code, name, new Date());
+    public Notebook(String code, String name, User createdBy) {
+        this(code, name, new Date(), createdBy);
     }
 
-    public Notebook(String code, String name, Date createdOn) {
+    public Notebook(String code, String name, Date createdOn, User createdBy) {
         this();
         this.code = code;
         this.name = name;
         this.createdOn = createdOn;
+        this.createdBy = createdBy;
     }
 
     public String getCode() {
@@ -79,11 +81,6 @@ public class Notebook {
     @Override
     public String toString() {
         return String.format("Notebook %s: %s", code, name);
-    }
-
-    private static String nameToCode(String name) {
-        String normalized = name.toLowerCase();
-        return normalized.replaceAll("(\\s|\\.|_|-)", "");
     }
 
 }

@@ -1,6 +1,7 @@
 package com.carlosmecha.notebooks.categories;
 
 import com.carlosmecha.notebooks.notebooks.Notebook;
+import com.carlosmecha.notebooks.utils.StringUtils;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.persistence.*;
@@ -35,7 +36,7 @@ public class Category {
     }
 
     public Category(Notebook notebook, String name) {
-        this(notebook, nameToCode(name), name);
+        this(notebook, StringUtils.nameToCode(name), name);
     }
 
     public Category(Notebook notebook, String code, String name) {
@@ -96,8 +97,4 @@ public class Category {
         return String.format("Category %s: %s", code, name);
     }
 
-    private static String nameToCode(String name) {
-        String normalized = name.toLowerCase();
-        return normalized.replaceAll("(\\s|\\.|_|-)", "");
-    }
 }

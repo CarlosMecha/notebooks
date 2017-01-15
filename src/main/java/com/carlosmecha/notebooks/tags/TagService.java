@@ -54,7 +54,7 @@ public class TagService {
      * @return The new tag.
      */
     @Transactional
-    public Tag createTag(Notebook notebook, String code) {
+    public Tag create(Notebook notebook, String code) {
         logger.debug("Creating tag {}", code);
         Tag tag = new Tag(notebook, code);
         repository.save(tag);
@@ -66,7 +66,7 @@ public class TagService {
      * @param notebookCode Notebook code.
      * @return List of tags.
      */
-    public Iterable<Tag> getTags(String notebookCode) {
+    public Iterable<Tag> getAll(String notebookCode) {
         logger.debug("Looking for all tags.");
         return repository.findAllByNotebookCode(notebookCode);
     }

@@ -7,6 +7,7 @@ import com.carlosmecha.notebooks.tags.Tag;
 import com.carlosmecha.notebooks.tags.TagService;
 import com.carlosmecha.notebooks.users.User;
 import com.carlosmecha.notebooks.utils.DataNotFoundException;
+import com.carlosmecha.notebooks.utils.ListUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -47,9 +49,9 @@ public class ExpenseService {
      * @param size Size of the list.
      * @return Expenses.
      */
-    public Iterable<Expense> getLatestExpenses(String notebookCode, int size) {
-        return repository.findAllByNotebookCode(notebookCode,
-                new PageRequest(0, size, Sort.Direction.DESC, "date", "createdOn"));
+    public List<Expense> getLatest(String notebookCode, int size) {
+        return ListUtils.toList(repository.findAllByNotebookCode(notebookCode,
+                new PageRequest(0, size, Sort.Direction.DESC, "date", "createdOn")));
     }
 
     /**
@@ -65,7 +67,7 @@ public class ExpenseService {
      * @throws DataNotFoundException When some data is missing.
      */
     @Transactional
-    public Expense createExpense(Notebook notebook, float value, int categoryId, Date date, Set<String> tagCodes, String note, User requester) throws DataNotFoundException {
+    public Expense create(Notebook notebook, float value, int categoryId, Date date, Set<String> tagCodes, String note, User requester) throws DataNotFoundException {
         logger.debug("Creating expense of {}", value);
 
         Optional<Category> category = categories.get(categoryId);
@@ -91,7 +93,7 @@ public class ExpenseService {
      * @param endDate End date.
      * @return Report.
      */
-    public Report createBasicReport(String notebookCode, String title, Date startDate, Date endDate) {
+    public Report createReportByDateRange(String notebookCode, String title, Date startDate, Date endDate) {
         return new Report(title, startDate, endDate, repository.findAllByNotebookCodeAndDateRange(notebookCode, startDate, endDate));
     }
 

@@ -56,8 +56,8 @@ public class CategoryService {
      * @param name Category name.
      * @return New category.
      */
-    public Category createCategory(Notebook notebook, String name) {
-        return createCategory(notebook,null, name);
+    public Category create(Notebook notebook, String name) {
+        return create(notebook,null, name);
     }
 
     /**
@@ -68,7 +68,7 @@ public class CategoryService {
      * @return New category.
      */
     @Transactional
-    public Category createCategory(Notebook notebook, String code, String name) {
+    public Category create(Notebook notebook, String code, String name) {
         logger.debug("Creating category {}", name);
         Category category = (code == null || code.isEmpty()) ? new Category(notebook, name) : new Category(notebook, code, name);
         repository.save(category);
@@ -80,7 +80,7 @@ public class CategoryService {
      * @param notebookCode Notebook code.
      * @return List of categories.
      */
-    public Iterable<Category> getCategories(String notebookCode) {
+    public Iterable<Category> getAll(String notebookCode) {
         logger.debug("Looking for all categories.");
         return repository.findAllByNotebookCode(notebookCode, new PageRequest(0, 1000, Sort.Direction.ASC, "code"));
     }
