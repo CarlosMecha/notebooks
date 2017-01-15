@@ -17,25 +17,27 @@ CREATE TABLE notebooks (
 );
 
 CREATE TABLE categories (
-    code VARCHAR(20),
-    notebook_code VARCHAR(20) REFERENCES notebooks(code),
+    id SERIAL PRIMARY KEY,
+    code VARCHAR(20) NOT NULL,
+    notebook_code VARCHAR(20) NOT NULL REFERENCES notebooks(code),
     name VARCHAR(100) NOT NULL,
     created_on TIMESTAMP NOT NULL DEFAULT now(),
-    PRIMARY KEY (code, notebook_code)
+    UNIQUE (code, notebook_code)
 );
 
 CREATE TABLE tags (
-    code VARCHAR(20),
-    notebook_code VARCHAR(20) REFERENCES notebooks(code),
+    id SERIAL PRIMARY KEY,
+    code VARCHAR(20) NOT NULL,
+    notebook_code VARCHAR(20) NOT NULL REFERENCES notebooks(code),
     created_on TIMESTAMP NOT NULL DEFAULT now(),
-    PRIMARY KEY (code, notebook_code)
+    UNIQUE (code, notebook_code)
 );
 
 -- Expenses
 CREATE TABLE expenses (
     id BIGSERIAL PRIMARY KEY,
     notebook_code VARCHAR(20) NOT NULL REFERENCES notebooks(code),
-    category_code VARCHAR(20) NOT NULL REFERENCES categories(code),
+    category_id INTEGER NOT NULL NOT NULL REFERENCES categories(id),
     value REAL NOT NULL,
     date TIMESTAMP NOT NULL,
     created_on TIMESTAMP NOT NULL DEFAULT now(),
@@ -46,8 +48,8 @@ CREATE TABLE expenses (
 
 CREATE TABLE expense_tags (
     expense_id BIGINT NOT NULL REFERENCES expenses(id),
-    tag_code VARCHAR(20) NOT NULL REFERENCES tags(code),
-    PRIMARY KEY (expense_id, tag_code)
+    tag_id INTEGER NOT NULL REFERENCES tags(id),
+    PRIMARY KEY (expense_id, tag_id)
 );
 
 -- Pages
@@ -72,6 +74,6 @@ CREATE TABLE page_comments (
 
 CREATE TABLE page_tags (
     page_id BIGINT NOT NULL REFERENCES pages(id),
-    tag_code VARCHAR(20) NOT NULL REFERENCES tags(code),
-    PRIMARY KEY (page_id, tag_code)
+    tag_id INTEGER NOT NULL REFERENCES tags(id),
+    PRIMARY KEY (page_id, tag_id)
 );
