@@ -5,6 +5,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
+
 /**
  * Category repository.
  *
@@ -13,9 +15,9 @@ import org.springframework.data.repository.query.Param;
 public interface CategoryRepository extends PagingAndSortingRepository<Category, Integer> {
 
     @Query("SELECT c FROM Category c WHERE c.notebook.code = :notebookCode")
-    Iterable<Category> findAllByNotebookCode(@Param("notebookCode") String notebookCode, Pageable pageable);
+    List<Category> findAllByNotebookCode(@Param("notebookCode") String notebookCode, Pageable pageable);
 
     @Query("SELECT c FROM Category c WHERE c.notebook.code = :notebookCode AND c.code = :code")
-    Category findOneByNotebookCodeAndCode(@Param("notebookCode") String notebookCode, @Param("code") String code);
+    List<Category> findByNotebookCodeAndCode(@Param("notebookCode") String notebookCode, @Param("code") String code);
 
 }

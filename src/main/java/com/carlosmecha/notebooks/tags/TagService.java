@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -43,8 +44,8 @@ public class TagService {
      * @return The tag if found.
      */
     public Optional<Tag> get(String notebookCode, String code) {
-        Tag tag = repository.findOneByNotebookCodeAndCode(notebookCode, code);
-        return Optional.ofNullable(tag);
+        List<Tag> tag = repository.findByNotebookCodeAndCode(notebookCode, code);
+        return (tag.isEmpty()) ? Optional.empty() : Optional.of(tag.get(0));
     }
     /**
      * Creates a tag.

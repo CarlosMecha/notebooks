@@ -6,6 +6,7 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * Expenses repository
@@ -15,7 +16,7 @@ import java.util.Date;
 public interface ExpenseRepository extends PagingAndSortingRepository<Expense, Long> {
 
     @Query("SELECT e FROM Expense e WHERE e.notebook.code = :notebookCode")
-    Iterable<Expense> findAllByNotebookCode(@Param("notebookCode") String notebookCode, Pageable pageable);
+    List<Expense> findAllByNotebookCode(@Param("notebookCode") String notebookCode, Pageable pageable);
 
     /**
      * Finds all expenses by date range and notebook code.
@@ -24,7 +25,7 @@ public interface ExpenseRepository extends PagingAndSortingRepository<Expense, L
      * @return An iterable.
      */
     @Query("SELECT e FROM Expense e WHERE e.notebook.code = :notebookCode AND e.date >= :startDate AND e.date <= :endDate ORDER BY e.date")
-    Iterable<Expense> findAllByNotebookCodeAndDateRange(@Param("notebookCode") String notebookCode,
+    List<Expense> findAllByNotebookCodeAndDateRange(@Param("notebookCode") String notebookCode,
                                          @Param("startDate") Date startDate, @Param("endDate") Date endDate);
 
 

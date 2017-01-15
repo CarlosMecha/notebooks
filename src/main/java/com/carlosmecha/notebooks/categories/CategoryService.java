@@ -9,6 +9,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -45,8 +46,8 @@ public class CategoryService {
      * @return The category if found.
      */
     public Optional<Category> get(String notebookCode, String code) {
-        Category category = repository.findOneByNotebookCodeAndCode(notebookCode, code);
-        return Optional.ofNullable(category);
+        List<Category> category = repository.findByNotebookCodeAndCode(notebookCode, code);
+        return (category.isEmpty()) ? Optional.empty() : Optional.of(category.get(0));
     }
 
     /**
