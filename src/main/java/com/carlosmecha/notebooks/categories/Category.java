@@ -34,16 +34,17 @@ public class Category {
     public Category() {
     }
 
-    public Category(String name) {
-        this(nameToCode(name), name);
+    public Category(Notebook notebook, String name) {
+        this(notebook, nameToCode(name), name);
     }
 
-    public Category(String code, String name) {
-        this(code, name, new Date());
+    public Category(Notebook notebook, String code, String name) {
+        this(notebook, code, name, new Date());
     }
 
-    public Category(String code, String name, Date createdOn) {
+    public Category(Notebook notebook, String code, String name, Date createdOn) {
         this();
+        this.notebook = notebook;
         this.code = code;
         this.name = name;
         this.createdOn = createdOn;

@@ -56,8 +56,9 @@ public class Expense {
     public Expense() {
     }
 
-    public Expense(Category category, float value, Date date, Set<Tag> tags, String notes, User createdBy) {
+    public Expense(Notebook notebook, Category category, float value, Date date, Set<Tag> tags, String notes, User createdBy) {
         this();
+        this.notebook = notebook;
         this.category = category;
         this.value = value;
         this.date = date;

@@ -32,12 +32,13 @@ public class Tag {
     public Tag() {
     }
 
-    public Tag(String code) {
-        this(code, new Date());
+    public Tag(Notebook notebook, String code) {
+        this(notebook, code, new Date());
     }
 
-    public Tag(String code, Date createdOn) {
+    public Tag(Notebook notebook, String code, Date createdOn) {
         this();
+        this.notebook = notebook;
         this.code = code;
         this.createdOn = createdOn;
     }

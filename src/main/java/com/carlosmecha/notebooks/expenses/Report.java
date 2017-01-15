@@ -6,6 +6,8 @@ import com.carlosmecha.notebooks.tags.Tag;
 import java.util.*;
 
 /**
+ * Basic report.
+ *
  * Created by carlos on 8/01/17.
  */
 public class Report {
