@@ -78,6 +78,15 @@ public class CategoryService {
 
     /**
      * Gets all categories for a notebook.
+     * @param notebook Notebook.
+     * @return List of categories.
+     */
+    public List<Category> getAll(Notebook notebook) {
+        return getAll(notebook.getCode());
+    }
+
+    /**
+     * Gets all categories for a notebook.
      * @param notebookCode Notebook code.
      * @return List of categories.
      */

@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.security.Principal;
+import java.util.Optional;
 
 /**
  * Common user operations.
@@ -25,13 +26,13 @@ public class UserService {
     }
 
     /**
-     * Retrieves an user by user details.
-     * @param principal Security principal.
-     * @return User if found, <code>null</code> otherwise.
+     * Retrieves an user by login name.
+     * @param loginName Login name.
+     * @return User if found.
      */
-    public User getLoggedUser(Principal principal) {
-        logger.debug("Looking for user with name {}", principal.getName());
-        return repository.findOne(principal.getName());
+    public Optional<User> get(String loginName) {
+        logger.debug("Looking for user with name {}", loginName);
+        return Optional.ofNullable(repository.findOne(loginName));
     }
 
 }

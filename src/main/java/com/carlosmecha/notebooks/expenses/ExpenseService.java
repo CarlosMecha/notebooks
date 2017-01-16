@@ -45,6 +45,16 @@ public class ExpenseService {
 
     /**
      * Gets a limited list of expenses ordered by date and creation date.
+     * @param notebook Notebook.
+     * @param size Size of the list.
+     * @return Expenses.
+     */
+    public List<Expense> getLatest(Notebook notebook, int size) {
+        return getLatest(notebook.getCode(), size);
+    }
+
+    /**
+     * Gets a limited list of expenses ordered by date and creation date.
      * @param notebookCode Notebook code.
      * @param size Size of the list.
      * @return Expenses.
@@ -87,14 +97,14 @@ public class ExpenseService {
 
     /**
      * Creates a basic report with all expenses between two dates.
-     * @param notebookCode Notebook code.
+     * @param notebook Notebook.
      * @param title Report title.
      * @param startDate Start date.
      * @param endDate End date.
      * @return Report.
      */
-    public Report createReportByDateRange(String notebookCode, String title, Date startDate, Date endDate) {
-        return new Report(title, startDate, endDate, repository.findAllByNotebookCodeAndDateRange(notebookCode, startDate, endDate));
+    public Report createReportByDateRange(Notebook notebook, String title, Date startDate, Date endDate) {
+        return new Report(title, startDate, endDate, repository.findAllByNotebookCodeAndDateRange(notebook.getCode(), startDate, endDate));
     }
 
 
