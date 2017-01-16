@@ -22,16 +22,16 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/api/v1/notebooks")
-public class ApiV1Controller {
+public class RestApiController {
 
-    private final static Logger logger = LoggerFactory.getLogger(ApiV1Controller.class);
+    private final static Logger logger = LoggerFactory.getLogger(RestApiController.class);
 
     private NotebookService notebooks;
     private CategoryService categories;
     private TagService tags;
 
     @Autowired
-    public ApiV1Controller(NotebookService notebooks, CategoryService categories, TagService tags) {
+    public RestApiController(NotebookService notebooks, CategoryService categories, TagService tags) {
         this.notebooks = notebooks;
         this.categories = categories;
         this.tags = tags;
