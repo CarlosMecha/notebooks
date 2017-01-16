@@ -24,7 +24,7 @@ public class Notebook {
     private Date createdOn;
 
     @ManyToOne
-    @JoinColumn(nullable = false, updatable = false)
+    @JoinColumn(name = "created_by", nullable = false, updatable = false)
     private User createdBy;
 
     public Notebook() {

@@ -58,7 +58,7 @@ public class NotebookService {
     @Transactional
     public Notebook create(String code, String name, User requester) {
         logger.debug("Creating notebook {} by {}", name, requester.getName());
-        Notebook notebook = new Notebook(code, name, requester);
+        Notebook notebook = (code == null || code.isEmpty()) ? new Notebook(name, requester) : new Notebook(code, name, requester);
         repository.save(notebook);
         return notebook;
     }

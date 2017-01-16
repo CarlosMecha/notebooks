@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head></head>
+<body>
+
+    <div th:fragment="header">
+
+        <!-- Profile and logout -->
+        <div class="profile pull-right">
+            <form action="#" th:action="@{/logout}" method="post" id="logout-form">
+                <div class="form-group">
+                    <label for="logout-button"><span th:text="${name}"/></label>
+                    <button type="submit" id="logout-button" class="btn btn-default">Logout</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Navigation -->
+        <div class="navigation">
+            <ul class="nav nav-pills">
+                <li role="presentation" id="notebooksNav"><a id="homeLink" th:href="@{/}">Notebooks</a></li>
+                <li role="presentation" id="expensesNav"><a id="expensesLink" th:href="@{/} + ${notebook.code} + '/expenses'">Expenses</a></li>
+                <li role="presentation" id="categoriesNav"><a id="categoriesLink" th:href="@{/} + ${notebook.code} + '/categories'">Categories</a></li>
+                <li role="presentation" id="latestNav"><a id="latestLink" th:href="@{/} + ${notebook.code} + '/latest'">Latest</a></li>
+            </ul>
+        </div>
+
+    </div>
+
+</body>
+</html>

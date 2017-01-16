@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <!-- Libraries -->
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous"/>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/select2/4.0.3/css/select2.min.css"/>
+    <link rel="stylesheet" href="/css/web.css"/>
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js"
+            integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
+            crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/select2/4.0.3/js/select2.min.js"></script>
+    <script src="/js/web.js"></script>
+    <script src="/js/notebooks.js"></script>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>Notebooks</title>
+
+</head>
+<body>
+
+    <!-- Profile and logout -->
+    <div class="profile pull-right">
+        <form action="#" th:action="@{/logout}" method="post" id="logout-form">
+            <div class="form-group">
+                <label for="logout-button"><span th:text="${name}"/></label>
+                <button type="submit" id="logout-button" class="btn btn-default">Logout</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h3 class="panel-title">Notebooks</h3>
+        </div>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Code</th>
+                    <th>Name</th>
+                    <th>Pages</th>
+                    <th>Expenses</th>
+                    <th>Notes</th>
+                    <th>Created On</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="n: ${notebooks}">
+                    <td th:text="${n.code}" th:href="${url}">Code</td>
+                    <td th:text="${n.name}">Name</td>
+                    <td th:href="@{/} + ${n.code} + '/pages/first'" class="pagesLink" >Pages</td>
+                    <td th:href="@{/} + ${n.code} + '/expenses'" class="expensesLink" >Expenses</td>
+                    <td>Notes</td>
+                    <td th:text="${n.createdOn}">Date</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="panel panel-default">
+        <div class="panel-heading">New notebook</div>
+        <div class="panel-body">
+            <form class="form-horizontal" action="#" th:action="@{/}" th:object="${notebook}" method="post">
+
+                <!-- Code -->
+                <div class="form-group">
+                    <label class="col-sm-2 control-label" for="code">Code (Optional)</label>
+                    <div class="col-sm-10">
+                        <input id="code" type="text" class="form-control" aria-label="Code (Optional)" th:field="*{code}"/>
+                    </div>
+                </div>
+
+                <!-- Name -->
+                <div class="form-group">
+                    <label class="col-sm-2 control-label" for="name">Name</label>
+                    <div class="col-sm-10">
+                        <input id="name" type="text" class="form-control" aria-label="Name" th:field="*{name}"/>
+                    </div>
+                </div>
+
+                <!-- Submit -->
+                <div class="form-group">
+                    <div class="btn-group col-sm-offset-2 col-sm-10" role="group">
+                        <button type="submit" class="btn btn-success">Add</button>
+                        <button type="reset" class="btn btn-default">Reset</button>
+                    </div>
+                </div>
+
+            </form>
+        </div>
+    </div>
+
+    <div th:include="fragments/footer :: footer"></div>
+
+</body>
+</html>

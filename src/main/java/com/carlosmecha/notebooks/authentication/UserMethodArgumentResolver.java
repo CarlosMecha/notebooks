@@ -2,6 +2,8 @@ package com.carlosmecha.notebooks.authentication;
 
 import com.carlosmecha.notebooks.users.User;
 import com.carlosmecha.notebooks.users.UserService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.MethodParameter;
 import org.springframework.security.core.Authentication;
@@ -22,6 +24,8 @@ import java.util.Optional;
 @Component
 public class UserMethodArgumentResolver implements HandlerMethodArgumentResolver {
 
+    private final static Logger logger = LoggerFactory.getLogger(UserMethodArgumentResolver.class);
+
     private UserService users;
 
     @Autowired
@@ -36,7 +40,12 @@ public class UserMethodArgumentResolver implements HandlerMethodArgumentResolver
 
     @Override
     public Object resolveArgument(MethodParameter methodParameter, ModelAndViewContainer modelAndViewContainer, NativeWebRequest nativeWebRequest, WebDataBinderFactory webDataBinderFactory) throws Exception {
+        logger.debug("Accesing with user {}", nativeWebRequest.getUserPrincipal().getName());
         Optional<User> user = users.get(nativeWebRequest.getUserPrincipal().getName());
-        return (user.isPresent()) ? user.get() : null;
+        if(!user.isPresent()) {
+            logger.error("Logger user {} not found!", nativeWebRequest.getUserPrincipal().getName());
+            return null;
+        }
+        return user.get();
     }
 }

@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head></head>
+<body>
+
+    <div th:fragment="footer">
+
+        <!-- Dynamic error -->
+        <div class="alert alert-danger" role="alert" id="errorPanel"></div>
+
+        <!-- Static server error -->
+        <div class="alert alert-danger" role="alert" th:if="${error}">
+            <p th:text="${error}"/>
+        </div>
+
+        <!-- Static server message -->
+        <div class="alert alert-success" role="alert" th:if="${message}">
+            <p th:text="${message}"/>
+        </div>
+
+    </div>
+
+</body>
+</html>
