@@ -1,6 +1,7 @@
 package com.carlosmecha.notebooks.categories;
 
 import com.carlosmecha.notebooks.notebooks.Notebook;
+import com.carlosmecha.notebooks.utils.ListUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,7 +47,7 @@ public class CategoryService {
      * @return The category if found.
      */
     public Optional<Category> get(String notebookCode, String code) {
-        List<Category> category = repository.findByNotebookCodeAndCode(notebookCode, code);
+        List<Category> category = ListUtils.toList(repository.findByNotebookCodeAndCode(notebookCode, code));
         return (category.isEmpty()) ? Optional.empty() : Optional.of(category.get(0));
     }
 
@@ -80,9 +81,10 @@ public class CategoryService {
      * @param notebookCode Notebook code.
      * @return List of categories.
      */
-    public Iterable<Category> getAll(String notebookCode) {
+    public List<Category> getAll(String notebookCode) {
         logger.debug("Looking for all categories.");
-        return repository.findAllByNotebookCode(notebookCode, new PageRequest(0, 1000, Sort.Direction.ASC, "code"));
+        return ListUtils.toList(repository.findAllByNotebookCode(notebookCode,
+                new PageRequest(0, 1000, Sort.Direction.ASC, "code")));
     }
 
 }

@@ -4,8 +4,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
-import java.util.List;
-
 /**
  * Tag repository.
  *
@@ -14,8 +12,8 @@ import java.util.List;
 public interface TagRepository extends CrudRepository<Tag, Integer> {
 
     @Query("SELECT t FROM Tag t WHERE t.notebook.code = :notebookCode")
-    List<Tag> findAllByNotebookCode(@Param("notebookCode") String notebookCode);
+    Iterable<Tag> findAllByNotebookCode(@Param("notebookCode") String notebookCode);
 
     @Query("SELECT t FROM Tag t WHERE t.notebook.code = :notebookCode AND t.code = :code")
-    List<Tag> findByNotebookCodeAndCode(@Param("notebookCode") String notebookCode, @Param("code") String code);
+    Iterable<Tag> findByNotebookCodeAndCode(@Param("notebookCode") String notebookCode, @Param("code") String code);
 }

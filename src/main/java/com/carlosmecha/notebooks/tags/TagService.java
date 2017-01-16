@@ -1,6 +1,7 @@
 package com.carlosmecha.notebooks.tags;
 
 import com.carlosmecha.notebooks.notebooks.Notebook;
+import com.carlosmecha.notebooks.utils.ListUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,7 +45,7 @@ public class TagService {
      * @return The tag if found.
      */
     public Optional<Tag> get(String notebookCode, String code) {
-        List<Tag> tag = repository.findByNotebookCodeAndCode(notebookCode, code);
+        List<Tag> tag = ListUtils.toList(repository.findByNotebookCodeAndCode(notebookCode, code));
         return (tag.isEmpty()) ? Optional.empty() : Optional.of(tag.get(0));
     }
     /**
@@ -66,9 +67,9 @@ public class TagService {
      * @param notebookCode Notebook code.
      * @return List of tags.
      */
-    public Iterable<Tag> getAll(String notebookCode) {
+    public List<Tag> getAll(String notebookCode) {
         logger.debug("Looking for all tags.");
-        return repository.findAllByNotebookCode(notebookCode);
+        return ListUtils.toList(repository.findAllByNotebookCode(notebookCode));
     }
 
 }

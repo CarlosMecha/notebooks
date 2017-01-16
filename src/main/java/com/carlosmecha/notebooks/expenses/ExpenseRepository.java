@@ -1,5 +1,6 @@
 package com.carlosmecha.notebooks.expenses;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
@@ -16,7 +17,7 @@ import java.util.List;
 public interface ExpenseRepository extends PagingAndSortingRepository<Expense, Long> {
 
     @Query("SELECT e FROM Expense e WHERE e.notebook.code = :notebookCode")
-    List<Expense> findAllByNotebookCode(@Param("notebookCode") String notebookCode, Pageable pageable);
+    Page<Expense> findAllByNotebookCode(@Param("notebookCode") String notebookCode, Pageable pageable);
 
     /**
      * Finds all expenses by date range and notebook code.
@@ -25,7 +26,7 @@ public interface ExpenseRepository extends PagingAndSortingRepository<Expense, L
      * @return An iterable.
      */
     @Query("SELECT e FROM Expense e WHERE e.notebook.code = :notebookCode AND e.date >= :startDate AND e.date <= :endDate ORDER BY e.date")
-    List<Expense> findAllByNotebookCodeAndDateRange(@Param("notebookCode") String notebookCode,
+    Iterable<Expense> findAllByNotebookCodeAndDateRange(@Param("notebookCode") String notebookCode,
                                          @Param("startDate") Date startDate, @Param("endDate") Date endDate);
 
 
