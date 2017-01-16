@@ -28,7 +28,7 @@ import java.util.Date;
  * Created by Carlos on 12/28/16.
  */
 @Controller
-@RequestMapping("/{notebookCode}/service")
+@RequestMapping("/{notebookCode}/expenses")
 public class ExpensesController {
 
     private final static Logger logger = LoggerFactory.getLogger(ExpensesController.class);
@@ -44,7 +44,7 @@ public class ExpensesController {
      * Shows this month report and a form to create a new expense.
      * @return Template name.
      */
-    @GetMapping("/")
+    @GetMapping
     public ModelAndView index(Notebook notebook, User user) {
 
         Calendar date = Calendar.getInstance();
@@ -54,9 +54,10 @@ public class ExpensesController {
         date.set(Calendar.DAY_OF_MONTH, date.getActualMaximum(Calendar.DAY_OF_MONTH));
         Date endDate = date.getTime();
 
-        ModelAndView model = new ModelAndView("service");
+        ModelAndView model = new ModelAndView("expenses");
 
         model.addObject("name", user.getName());
+        model.addObject("notebook", notebook);
         model.addObject("report", service.createReportByDateRange(notebook, "Monthly", startDate, endDate));
         model.addObject("expense", new ExpenseForm());
         return model;
@@ -70,7 +71,8 @@ public class ExpensesController {
     public ModelAndView getLatest(Notebook notebook, User user) {
         ModelAndView model = new ModelAndView("latest");
         model.addObject("name", user.getName());
-        model.addObject("service", service.getLatest(notebook, 100));
+        model.addObject("notebook", notebook);
+        model.addObject("expenses", service.getLatest(notebook, 100));
         return model;
     }
 
@@ -81,7 +83,7 @@ public class ExpensesController {
      * @param attributes Redirect attributes.
      * @return Redirection.
      */
-    @PostMapping("/")
+    @PostMapping
     public ModelAndView create(@ModelAttribute ExpenseForm expense,
                          BindingResult result,
                          RedirectAttributes attributes,
@@ -89,8 +91,8 @@ public class ExpensesController {
         logger.debug("User {} is trying to create expense {}", user.getLoginName(), expense.getValue());
 
         if(result.hasErrors() || expense.categoryId < 0) {
-            attributes.addAttribute("error", "Missing information!");
-            return new ModelAndView(new RedirectView(notebook.getCode() + "/service"));
+            attributes.addFlashAttribute("error", "Missing information!");
+            return new ModelAndView(new RedirectView(notebook.getCode() + "/expenses"));
         }
 
         try {
@@ -99,12 +101,12 @@ public class ExpensesController {
                     StringUtils.split(expense.getTagCodes(), ","),
                     expense.getNotes(), user);
         } catch (DataNotFoundException e) {
-            attributes.addAttribute("error", "Data not found!");
-            return new ModelAndView(new RedirectView(notebook.getCode() + "/service"));
+            attributes.addFlashAttribute("error", "Data not found!");
+            return new ModelAndView(new RedirectView(notebook.getCode() + "/expenses"));
         }
 
-        attributes.addAttribute("message", "Expense created");
-        return new ModelAndView(new RedirectView(notebook.getCode() + "/service"));
+        attributes.addFlashAttribute("message", "Expense created");
+        return new ModelAndView(new RedirectView(notebook.getCode() + "/expenses"));
     }
 
     /**

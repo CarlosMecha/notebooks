@@ -39,7 +39,7 @@ public class CategoriesController {
      * Shows all categories and a form to create a new one.
      * @return Template name.
      */
-    @GetMapping("/")
+    @GetMapping
     public ModelAndView getAll(Notebook notebook, User user) {
         ModelAndView model = new ModelAndView("categories");
         model.addObject("notebook", notebook);
@@ -56,7 +56,7 @@ public class CategoriesController {
      * @param attributes Redirect attributes.
      * @return Redirection.
      */
-    @PostMapping("/")
+    @PostMapping
     public ModelAndView create(@ModelAttribute CategoryForm category,
                          BindingResult result,
                          RedirectAttributes attributes,
@@ -65,12 +65,12 @@ public class CategoriesController {
         logger.debug("User {} is trying to create category {}", user.getLoginName(), category.getName());
 
         if(result.hasErrors() || category.getName() == null || category.getName().isEmpty()) {
-            attributes.addAttribute("error", "Error creating the category, check the information provided");
+            attributes.addFlashAttribute("error", "Error creating the category, check the information provided");
             return new ModelAndView(new RedirectView(notebook.getCode() + "/categories"));
         }
 
         service.create(notebook, category.getCode(), category.getName());
-        attributes.addAttribute("message", "Category " + category.getName() + " created.");
+        attributes.addFlashAttribute("message", "Category " + category.getName() + " created.");
 
         return new ModelAndView(new RedirectView(notebook.getCode() + "/categories"));
     }

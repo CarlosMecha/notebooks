@@ -60,12 +60,12 @@ public class NotebooksController {
         logger.debug("User {} is trying to create notebook {}", user.getLoginName(), notebook.getName());
 
         if(result.hasErrors() || notebook.getName() == null || notebook.getName().isEmpty()) {
-            attributes.addAttribute("error", "Error creating the notebook, check the information provided");
+            attributes.addFlashAttribute("error", "Error creating the notebook, check the information provided");
             return new ModelAndView(new RedirectView("/"));
         }
 
         service.create(notebook.getCode(), notebook.getName(), user);
-        attributes.addAttribute("message", "Notebook " + notebook.getName() + " created.");
+        attributes.addFlashAttribute("message", "Notebook " + notebook.getName() + " created.");
 
         return new ModelAndView(new RedirectView("/"));
     }
