@@ -66,13 +66,13 @@ public class CategoriesController {
 
         if(result.hasErrors() || category.getName() == null || category.getName().isEmpty()) {
             attributes.addFlashAttribute("error", "Error creating the category, check the information provided");
-            return new ModelAndView(new RedirectView(notebook.getCode() + "/categories"));
+            return new ModelAndView(new RedirectView("/notebooks/" + notebook.getCode() + "/categories"));
         }
 
         service.create(notebook, category.getCode(), category.getName());
         attributes.addFlashAttribute("message", "Category " + category.getName() + " created.");
 
-        return new ModelAndView(new RedirectView(notebook.getCode() + "/categories"));
+        return new ModelAndView(new RedirectView("/notebooks/" + notebook.getCode() + "/categories"));
     }
 
     /**

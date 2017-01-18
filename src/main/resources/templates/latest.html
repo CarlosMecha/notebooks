@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <!-- Libraries -->
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous"/>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/select2/4.0.3/css/select2.min.css"/>
+    <link rel="stylesheet" href="/css/web.css"/>
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js"
+            integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
+            crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/select2/4.0.3/js/select2.min.js"></script>
+    <script src="/js/web.js"></script>
+    <script src="/js/latest.js"></script>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>Bank</title>
+
+</head>
+<body>
+
+    <div th:include="fragments/header :: header"></div>
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h3 class="panel-title">Expenses</h3>
+        </div>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th><span class="glyphicon glyphicon-usd" aria-hidden="true"></span></th>
+                    <th>Category</th>
+                    <th><span class="glyphicon glyphicon-tags" aria-hidden="true"></span></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="expense: ${expenses}">
+                    <td th:text="*{#calendars.format(expense.date,'dd MMM yyyy')}">Date</td>
+                    <td th:text="*{#numbers.formatDecimal(expense.value, 1, 2)}">Value</td>
+                    <td th:text="${expense.category.name}">Category</td>
+                    <td th:text="${#strings.arrayJoin(expense.tags,', ')}">Tags</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div th:include="fragments/footer :: footer"></div>
+
+</body>
+</html>

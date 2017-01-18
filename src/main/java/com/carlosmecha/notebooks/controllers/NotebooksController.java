@@ -61,13 +61,13 @@ public class NotebooksController {
 
         if(result.hasErrors() || notebook.getName() == null || notebook.getName().isEmpty()) {
             attributes.addFlashAttribute("error", "Error creating the notebook, check the information provided");
-            return new ModelAndView(new RedirectView("/"));
+            return new ModelAndView(new RedirectView("/notebooks"));
         }
 
         service.create(notebook.getCode(), notebook.getName(), user);
         attributes.addFlashAttribute("message", "Notebook " + notebook.getName() + " created.");
 
-        return new ModelAndView(new RedirectView("/"));
+        return new ModelAndView(new RedirectView("/notebooks"));
     }
 
     /**

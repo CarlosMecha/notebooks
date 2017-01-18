@@ -92,7 +92,7 @@ public class ExpensesController {
 
         if(result.hasErrors() || expense.categoryId < 0) {
             attributes.addFlashAttribute("error", "Missing information!");
-            return new ModelAndView(new RedirectView(notebook.getCode() + "/expenses"));
+            return new ModelAndView(new RedirectView("/notebooks/" + notebook.getCode() + "/expenses"));
         }
 
         try {
@@ -102,11 +102,11 @@ public class ExpensesController {
                     expense.getNotes(), user);
         } catch (DataNotFoundException e) {
             attributes.addFlashAttribute("error", "Data not found!");
-            return new ModelAndView(new RedirectView(notebook.getCode() + "/expenses"));
+            return new ModelAndView(new RedirectView("/notebooks/" + notebook.getCode() + "/expenses"));
         }
 
         attributes.addFlashAttribute("message", "Expense created");
-        return new ModelAndView(new RedirectView(notebook.getCode() + "/expenses"));
+        return new ModelAndView(new RedirectView("/notebooks/" + notebook.getCode() + "/expenses"));
     }
 
     /**
