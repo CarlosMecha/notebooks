@@ -23,7 +23,7 @@ import org.springframework.web.servlet.view.RedirectView;
  * Created by Carlos on 12/29/16.
  */
 @Controller
-@RequestMapping("/{notebookCode}/categories")
+@RequestMapping("/notebooks/{notebookCode}/categories")
 public class CategoriesController {
 
     private final static Logger logger = LoggerFactory.getLogger(CategoriesController.class);

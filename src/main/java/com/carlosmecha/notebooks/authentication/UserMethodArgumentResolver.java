@@ -38,12 +38,15 @@ public class UserMethodArgumentResolver implements HandlerMethodArgumentResolver
 
     @Override
     public Object resolveArgument(MethodParameter methodParameter, ModelAndViewContainer modelAndViewContainer, NativeWebRequest nativeWebRequest, WebDataBinderFactory webDataBinderFactory) throws Exception {
-        logger.debug("Accesing with user {}", nativeWebRequest.getUserPrincipal().getName());
-        Optional<User> user = users.get(nativeWebRequest.getUserPrincipal().getName());
-        if(!user.isPresent()) {
-            logger.error("Logger user {} not found!", nativeWebRequest.getUserPrincipal().getName());
-            return null;
+        if(nativeWebRequest.getUserPrincipal() != null) {
+            logger.debug("Accesing with user {}", nativeWebRequest.getUserPrincipal().getName());
+            Optional<User> user = users.get(nativeWebRequest.getUserPrincipal().getName());
+            if (!user.isPresent()) {
+                logger.error("Logger user {} not found!", nativeWebRequest.getUserPrincipal().getName());
+                return null;
+            }
+            return user.get();
         }
-        return user.get();
+        return null;
     }
 }

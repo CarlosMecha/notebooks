@@ -49,8 +49,8 @@
                 <tr th:each="n: ${notebooks}">
                     <td th:text="${n.code}" th:href="${url}">Code</td>
                     <td th:text="${n.name}">Name</td>
-                    <td th:href="@{/} + ${n.code} + '/pages/first'" class="pagesLink" >Pages</td>
-                    <td th:href="@{/} + ${n.code} + '/expenses'" class="expensesLink" >Expenses</td>
+                    <td th:href="@{/notebooks/} + ${n.code} + '/pages/first'" class="pagesLink" >Pages</td>
+                    <td th:href="@{/notebooks/} + ${n.code} + '/expenses'" class="expensesLink" >Expenses</td>
                     <td>Notes</td>
                     <td th:text="${n.createdOn}">Date</td>
                 </tr>
@@ -61,7 +61,7 @@
     <div class="panel panel-default">
         <div class="panel-heading">New notebook</div>
         <div class="panel-body">
-            <form class="form-horizontal" action="#" th:action="@{/}" th:object="${notebook}" method="post">
+            <form class="form-horizontal" action="#" th:action="@{/notebooks}" th:object="${notebook}" method="post">
 
                 <!-- Code -->
                 <div class="form-group">

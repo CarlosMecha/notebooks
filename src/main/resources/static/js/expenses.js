@@ -22,7 +22,7 @@
         }
 
         // Notebook code.
-        self.notebook = self.jquery("#notebookCode").text();
+        self.notebook = self.jquery("#notebookCode").val();
 
         // Navigation
         self.activateNavigationLink("expenses");
@@ -35,26 +35,27 @@
 
         // Load categories
         self.log("Loading categories.");
-        self.get("/api/v1/" + self.notebook + "/categories", {}, function(data) {
-            data = data.content;
-            self.log("Retrieved " + data.length + " categories.");
-            var selector = self.jquery("#category");
+        self.get("/api/v1/notebooks/" + self.notebook + "/categories", {}, function(data) {
+            if('content' in data) {
+                data = data.content;
+                self.log("Retrieved " + data.length + " categories.");
+                var selector = self.jquery("#category");
 
-            // TODO: Validation
-            self.jquery.each(data, function(index, category) {
-                self.categories.push(category);
-                selector.append(self.jquery("<option>", {value: category.id, text: category.name}));
-            });
+                // TODO: Validation
+                self.jquery.each(data, function(index, category) {
+                    self.categories.push(category);
+                    selector.append(self.jquery("<option>", {value: category.id, text: category.name}));
+                });
 
-            selector.prop("selectedIndex", -1);
-
+                selector.prop("selectedIndex", -1);
+            }
         }).fail(function(){
             self.error("Error requesting categories");
         });
 
         // Load tags
         self.log("Loading tags.");
-        self.get("/api/v1/" + self.notebook + "/tags", {}, function(data){
+        self.get("/api/v1/notebooks/" + self.notebook + "/tags", {}, function(data){
             self.log("Retrieved " + data.length + " tags.");
             var selector = self.jquery("#tags");
 

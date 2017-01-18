@@ -36,7 +36,7 @@ public class NotebooksController {
      * Shows all notebooks and a form to create a new one.
      * @return Template name.
      */
-    @GetMapping("/")
+    @GetMapping({"/", "/notebooks"})
     public ModelAndView getAll(User user) {
         ModelAndView model = new ModelAndView("notebooks");
         model.addObject("name", user.getName());
@@ -52,7 +52,7 @@ public class NotebooksController {
      * @param attributes Redirect attributes.
      * @return Redirection.
      */
-    @PostMapping("/")
+    @PostMapping({"/", "/notebooks"})
     public ModelAndView create(@ModelAttribute NotebookForm notebook,
                          BindingResult result,
                          RedirectAttributes attributes,

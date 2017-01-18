@@ -18,10 +18,10 @@
         <!-- Navigation -->
         <div class="navigation">
             <ul class="nav nav-pills">
-                <li role="presentation" id="notebooksNav"><a id="homeLink" th:href="@{/}">Notebooks</a></li>
-                <li role="presentation" id="expensesNav"><a id="expensesLink" th:href="@{/} + ${notebook.code} + '/expenses'">Expenses</a></li>
-                <li role="presentation" id="categoriesNav"><a id="categoriesLink" th:href="@{/} + ${notebook.code} + '/categories'">Categories</a></li>
-                <li role="presentation" id="latestNav"><a id="latestLink" th:href="@{/} + ${notebook.code} + '/latest'">Latest</a></li>
+                <li role="presentation" id="notebooksNav"><a id="homeLink" th:href="@{/notebooks}">Notebooks</a></li>
+                <li role="presentation" id="expensesNav"><a id="expensesLink" th:href="@{/notebooks/} + ${notebook.code} + '/expenses'">Expenses</a></li>
+                <li role="presentation" id="categoriesNav"><a id="categoriesLink" th:href="@{/notebooks/} + ${notebook.code} + '/categories'">Categories</a></li>
+                <li role="presentation" id="latestNav"><a id="latestLink" th:href="@{/notebooks/} + ${notebook.code} + '/latest'">Latest</a></li>
             </ul>
         </div>
 

@@ -28,7 +28,7 @@ import java.util.Date;
  * Created by Carlos on 12/28/16.
  */
 @Controller
-@RequestMapping("/{notebookCode}/expenses")
+@RequestMapping("/notebooks/{notebookCode}/expenses")
 public class ExpensesController {
 
     private final static Logger logger = LoggerFactory.getLogger(ExpensesController.class);

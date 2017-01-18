@@ -50,7 +50,7 @@
     <div class="panel panel-default">
         <div class="panel-heading">Upload</div>
         <div class="panel-body">
-            <form class="form-horizontal" action="#" th:action="@{/} + ${notebook.code} + '/expenses'" th:object="${expense}" method="post" >
+            <form class="form-horizontal" action="#" th:action="@{/notebooks/} + ${notebook.code} + '/expenses'" th:object="${expense}" method="post" >
 
                 <!-- Value -->
                 <div class="form-group">
@@ -106,7 +106,7 @@
 
     <div th:include="fragments/footer :: footer"></div>
 
-    <input type="hidden" id="notebookCode" th:text="${notebook.code}"/>
+    <input type="hidden" id="notebookCode" th:value="${notebook.code}"/>
 
 </body>
 </html>
