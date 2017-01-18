@@ -38,7 +38,7 @@ public class Page {
     @JoinTable(name = "page_tags", joinColumns = {
             @JoinColumn(name = "page_id", nullable = false, updatable = false)
     }, inverseJoinColumns = {
-            @JoinColumn(name = "tag_code", nullable = false, updatable = false)
+            @JoinColumn(name = "tag_id", nullable = false, updatable = false)
     })
     private Set<Tag> tags;
 

@@ -124,7 +124,7 @@ public class PagesController {
 
                 int index = first ? 0 : ids.size() - 1;
 
-                model.addObject("page", service.get(ids.get(index)));
+                model.addObject("page", service.get(ids.get(index)).get());
                 model.addObject("comments", renderComments(service.getSortedComments(ids.get(index))));
                 if(ids.size() > 1) {
                     if(first) {
@@ -147,7 +147,7 @@ public class PagesController {
             return new ModelAndView(new RedirectView("/notebooks/" + notebook.getCode() + "/pages"));
         }
 
-        model.addObject("page", page);
+        model.addObject("page", page.get());
         model.addObject("comments", renderComments(service.getSortedComments(id)));
         List<Integer> ids = service.getAllIds(notebook);
         int prev = -1;
@@ -212,8 +212,6 @@ public class PagesController {
 
         @NotNull
         private float value;
-        @NotEmpty
-        private String notebookCode;
         @NotNull
         private String date;
         private String tagCodes;
@@ -229,14 +227,6 @@ public class PagesController {
 
         public void setValue(float value) {
             this.value = value;
-        }
-
-        public String getNotebookCode() {
-            return notebookCode;
-        }
-
-        public void setNotebookCode(String notebookCode) {
-            this.notebookCode = notebookCode;
         }
 
         public String getText() {
@@ -267,7 +257,6 @@ public class PagesController {
         public String toString() {
             return "PageForm{" +
                     "value=" + value +
-                    ", notebookCode='" + notebookCode + '\'' +
                     ", date=" + date +
                     ", tagCodes=" + tagCodes +
                     ", text='" + text + '\'' +
