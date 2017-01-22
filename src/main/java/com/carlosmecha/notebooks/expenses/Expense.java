@@ -1,5 +1,6 @@
 package com.carlosmecha.notebooks.expenses;
 
+import com.carlosmecha.notebooks.budgets.Budget;
 import com.carlosmecha.notebooks.categories.Category;
 import com.carlosmecha.notebooks.notebooks.Notebook;
 import com.carlosmecha.notebooks.tags.Tag;
@@ -51,18 +52,27 @@ public class Expense {
     })
     private Set<Tag> tags;
 
+    @ManyToMany(cascade = CascadeType.ALL)
+    @JoinTable(name = "budget_expenses", joinColumns = {
+            @JoinColumn(name = "expense_id", nullable = false, updatable = false)
+    }, inverseJoinColumns = {
+            @JoinColumn(name = "budget_id", nullable = false, updatable = false)
+    })
+    private Set<Budget> budgets;
+
     private String notes;
 
     public Expense() {
     }
 
-    public Expense(Notebook notebook, Category category, float value, Date date, Set<Tag> tags, String notes, User createdBy) {
+    public Expense(Notebook notebook, Category category, float value, Date date, Set<Tag> tags, Set<Budget> budgets, String notes, User createdBy) {
         this();
         this.notebook = notebook;
         this.category = category;
         this.value = value;
         this.date = date;
         this.tags = tags;
+        this.budgets = budgets;
         this.notes = notes;
         this.createdOn = new Date();
         this.updatedOn = createdOn;
@@ -139,6 +149,14 @@ public class Expense {
 
     public void setTags(Set<Tag> tags) {
         this.tags = tags;
+    }
+
+    public Set<Budget> getBudgets() {
+        return budgets;
+    }
+
+    public void setBudgets(Set<Budget> budgets) {
+        this.budgets = budgets;
     }
 
     public String getNotes() {

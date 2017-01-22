@@ -46,6 +46,29 @@ CREATE TABLE expenses (
     notes TEXT
 );
 
+CREATE TABLE budgets (
+    id SERIAL PRIMARY KEY,
+    notebook_code VARCHAR(20) NOT NULL REFERENCES notebooks(code),
+    value REAL NOT NULL,
+    start_on TIMESTAMP NOT NULL,
+    end_on TIMESTAMP NOT NULL,
+    created_on TIMESTAMP NOT NULL DEFAULT now(),
+    created_by VARCHAR(20) NOT NULL REFERENCES users(login_name),
+    description TEXT
+);
+
+CREATE TABLE budget_expenses (
+    budget_id INTEGER NOT NULL REFERENCES budgets(id),
+    expense_id BIGINT NOT NULL REFERENCES expenses(id),
+    PRIMARY KEY (budget_id, expense_id)
+);
+
+CREATE TABLE expense_tags (
+    expense_id BIGINT NOT NULL REFERENCES expenses(id),
+    tag_id INTEGER NOT NULL REFERENCES tags(id),
+    PRIMARY KEY (expense_id, tag_id)
+);
+
 CREATE TABLE expense_tags (
     expense_id BIGINT NOT NULL REFERENCES expenses(id),
     tag_id INTEGER NOT NULL REFERENCES tags(id),
