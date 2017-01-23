@@ -2,6 +2,7 @@ package com.carlosmecha.notebooks.controllers;
 
 import com.carlosmecha.notebooks.budgets.Budget;
 import com.carlosmecha.notebooks.budgets.BudgetService;
+import com.carlosmecha.notebooks.expenses.Expense;
 import com.carlosmecha.notebooks.notebooks.Notebook;
 import com.carlosmecha.notebooks.users.User;
 import com.carlosmecha.notebooks.utils.StringUtils;
@@ -66,6 +67,13 @@ public class BudgetsController {
         model.addObject("notebook", notebook);
         model.addObject("name", user.getName());
         model.addObject("budget", budget.get());
+
+        float total = budget.get().getValue();
+        for (Expense e : budget.get().getExpenses()) {
+            total -= e.getValue();
+        }
+
+        model.addObject("total", total);
         return model;
     }
 
@@ -89,7 +97,7 @@ public class BudgetsController {
             return new ModelAndView(new RedirectView("/notebooks/" + notebook.getCode() + "/budgets"));
         }
 
-        service.create(notebook, budget.getValue(),
+        service.create(notebook, budget.getName(), budget.getValue(),
                 StringUtils.unsafeToDate(budget.getStartOn(), "yyyy-MM-dd", logger),
                 StringUtils.unsafeToDate(budget.getEndOn(), "yyyy-MM-dd", logger),
                 budget.getDescription(), user);
@@ -103,12 +111,21 @@ public class BudgetsController {
      */
     public static class BudgetForm {
 
+        private String name;
         private float value;
         private String startOn;
         private String endOn;
         private String description;
 
         public BudgetForm() {
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
         }
 
         public float getValue() {

@@ -49,6 +49,7 @@ CREATE TABLE expenses (
 CREATE TABLE budgets (
     id SERIAL PRIMARY KEY,
     notebook_code VARCHAR(20) NOT NULL REFERENCES notebooks(code),
+    name VARCHAR(100) NOT NULL,
     value REAL NOT NULL,
     start_on TIMESTAMP NOT NULL,
     end_on TIMESTAMP NOT NULL,

@@ -63,13 +63,17 @@
             });
 
             selector.prop("selectedIndex", -1);
-
-            self.jquery("#tags").select2({tags: true});
+            selector.select2({tags: true});
 
         }).fail(function(){
             console.error("Error requesting tags");
             self.displayError("Error requesting tags to the server. Please retry it.");
         });
+
+        // Load budgets
+        var selector = self.jquery("#budgets");
+        selector.prop("selectedIndex", -1);
+        selector.select2();
 
         self.started = true;
 

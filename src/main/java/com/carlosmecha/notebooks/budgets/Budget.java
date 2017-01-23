@@ -25,6 +25,7 @@ public class Budget {
     @JoinColumn(name = "notebook_code", nullable = false, updatable = false)
     private Notebook notebook;
 
+    private String name;
     private float value;
 
     @Column(name = "start_on")
@@ -53,9 +54,10 @@ public class Budget {
     public Budget() {
     }
 
-    public Budget(Notebook notebook, float value, Date startOn, Date endOn, String description, User createdBy) {
+    public Budget(Notebook notebook, String name, float value, Date startOn, Date endOn, String description, User createdBy) {
         this();
         this.notebook = notebook;
+        this.name = name;
         this.value = value;
         this.startOn = startOn;
         this.endOn = endOn;
@@ -78,6 +80,14 @@ public class Budget {
 
     public void setNotebook(Notebook notebook) {
         this.notebook = notebook;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public float getValue() {

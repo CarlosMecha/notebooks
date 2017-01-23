@@ -45,6 +45,7 @@ public class BudgetService {
     /**
      * Creates the budget.
      * @param notebook Notebook.
+     * @param name Name.
      * @param value Budget value.
      * @param startOn When the budget starts.
      * @param endOn When the budget ends.
@@ -53,9 +54,9 @@ public class BudgetService {
      * @return New budget.
      */
     @Transactional
-    public Budget create(Notebook notebook, float value, Date startOn, Date endOn, String description, User requester) {
+    public Budget create(Notebook notebook, String name, float value, Date startOn, Date endOn, String description, User requester) {
         logger.debug("Creating budget for notebook {}", notebook.getCode());
-        Budget budget = new Budget(notebook, value, startOn, endOn, description, requester);
+        Budget budget = new Budget(notebook, name, value, startOn, endOn, description, requester);
         repository.save(budget);
         return budget;
     }

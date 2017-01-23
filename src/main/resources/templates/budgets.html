@@ -13,7 +13,7 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/select2/4.0.3/js/select2.min.js"></script>
     <script src="/js/web.js"></script>
-    <script src="/js/categories.js"></script>
+    <script src="/js/budgets.js"></script>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <title th:text="${notebook.name}">Notebook</title>
 
@@ -24,44 +24,70 @@
 
     <div class="panel panel-default">
         <div class="panel-heading">
-            <h3 class="panel-title">Categories</h3>
+            <h3 class="panel-title">Budgets</h3>
         </div>
         <table class="table">
             <thead>
                 <tr>
-                    <th>Code</th>
                     <th>Name</th>
-                    <th>Created On</th>
+                    <th>Amount</th>
+                    <th>Starts</th>
+                    <th>Ends</th>
                 </tr>
             </thead>
             <tbody>
-                <tr th:each="c: ${categories}">
-                    <td th:text="${c.code}" >Code</td>
-                    <td th:text="${c.name}">Name</td>
-                    <td th:text="${c.createdOn}">Date</td>
+                <tr th:each="b: ${budgets}">
+                    <td th:href="@{/notebooks/} + ${n.code} + '/budgets/' + ${b.id}" class="budgetLink" th:text="${b.name}"></td>
+                    <td th:text="${n.value}">Value</td>
+                    <td th:text="${n.startOn}">Start on</td>
+                    <td th:text="${n.endOn}">End on</td>
                 </tr>
             </tbody>
         </table>
     </div>
 
     <div class="panel panel-default">
-        <div class="panel-heading">New category</div>
+        <div class="panel-heading">New budget</div>
         <div class="panel-body">
-            <form class="form-horizontal" action="#" th:action="@{/notebooks/} + ${notebook.code} + '/categories'" th:object="${category}" method="post">
-
-                <!-- Code -->
-                <div class="form-group">
-                    <label class="col-sm-2 control-label" for="code">Code (Optional)</label>
-                    <div class="col-sm-10">
-                        <input id="code" type="text" class="form-control" aria-label="Code (Optional)" th:field="*{code}"/>
-                    </div>
-                </div>
+            <form class="form-horizontal" action="#" th:action="@{/notebooks/} + ${notebook.code} + '/budgets'" th:object="${budget}" method="post">
 
                 <!-- Name -->
                 <div class="form-group">
                     <label class="col-sm-2 control-label" for="name">Name</label>
                     <div class="col-sm-10">
                         <input id="name" type="text" class="form-control" aria-label="Name" th:field="*{name}"/>
+                    </div>
+                </div>
+
+                <!-- Value -->
+                <div class="form-group">
+                    <label class="col-sm-2 control-label" for="value"><span class="glyphicon glyphicon-usd" aria-hidden="true"></span></label>
+                    <div class="col-sm-10">
+                        <input type="number" id="value" class="form-control" aria-label="Amount" th:field="*{value}" step="0.01"/>
+                    </div>
+                </div>
+
+                <!-- Start on -->
+                <div class="form-group">
+                    <label class="col-sm-2 control-label" for="starts">Starts</label>
+                    <div class="col-sm-10">
+                        <input type="date" id="starts" class="form-control" aria-label="Starts" th:field="*{startOn}"/>
+                    </div>
+                </div>
+
+                <!-- End on -->
+                <div class="form-group">
+                    <label class="col-sm-2 control-label" for="ends">Ends</label>
+                    <div class="col-sm-10">
+                        <input type="date" id="ends" class="form-control" aria-label="Ends" th:field="*{endOn}"/>
+                    </div>
+                </div>
+
+                <!-- Description -->
+                <div class="form-group">
+                    <label class="col-sm-2 control-label" for="description">Description</label>
+                    <div class="col-sm-10">
+                        <textarea id="description" class="form-control" aria-label="Description" th:field="*{description}"></textarea>
                     </div>
                 </div>
 

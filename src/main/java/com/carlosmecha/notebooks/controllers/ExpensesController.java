@@ -1,5 +1,6 @@
 package com.carlosmecha.notebooks.controllers;
 
+import com.carlosmecha.notebooks.budgets.BudgetService;
 import com.carlosmecha.notebooks.expenses.ExpenseService;
 import com.carlosmecha.notebooks.notebooks.Notebook;
 import com.carlosmecha.notebooks.users.User;
@@ -34,10 +35,12 @@ public class ExpensesController {
     private final static Logger logger = LoggerFactory.getLogger(ExpensesController.class);
 
     private ExpenseService service;
+    private BudgetService budgets;
 
     @Autowired
-    public ExpensesController(ExpenseService service) {
+    public ExpensesController(ExpenseService service, BudgetService budgets) {
         this.service = service;
+        this.budgets = budgets;
     }
 
     /**
@@ -60,6 +63,7 @@ public class ExpensesController {
         model.addObject("notebook", notebook);
         model.addObject("report", service.createReportByDateRange(notebook, "Monthly", startDate, endDate));
         model.addObject("expense", new ExpenseForm());
+        model.addObject("budgets", budgets.getAll(notebook.getCode()));
         return model;
     }
 
@@ -119,6 +123,7 @@ public class ExpensesController {
         @NotNull
         private String date;
         private String tagCodes;
+        private String budgetIds;
         private String notes;
 
         public ExpenseForm() {
@@ -154,6 +159,14 @@ public class ExpensesController {
 
         public void setTagCodes(String tagCodes) {
             this.tagCodes = tagCodes;
+        }
+
+        public String getBudgetIds() {
+            return budgetIds;
+        }
+
+        public void setBudgetIds(String budgetIds) {
+            this.budgetIds = budgetIds;
         }
 
         public String getNotes() {
