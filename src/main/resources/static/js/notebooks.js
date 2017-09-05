@@ -24,6 +24,15 @@
             elem.append(link);
         });
 
+        // Budgets links
+        self.jquery(".budgetsLink").each(function(i) {
+            var elem = self.jquery(this);
+            var ref = elem.attr("href");
+            var link = self.jquery("<a></a>").attr({href: ref}).text(elem.text());
+            elem.text(""); // Remove text.
+            elem.append(link);
+        });
+
         self.started = true;
     }
 

@@ -84,9 +84,9 @@
                     </div>
                 </div>
 
-                <!-- Tags -->
+                <!-- Budgets -->
                 <div class="form-group">
-                    <label class="col-sm-2 control-label" for="budgets"><span class="glyphicon glyphicon-tags" aria-hidden="true"></span></label>
+                    <label class="col-sm-2 control-label" for="budgets"><span class="glyphicon glyphicon-list-alt" aria-hidden="true"></span></label>
                     <div class="col-sm-10">
                         <select class="form-control" id="budgets" th:field="*{budgetIds}" multiple="multiple" th:each="budget : ${budgets}">
                             <option th:value="${budget.id}" th:text="${budget.name}"></option>

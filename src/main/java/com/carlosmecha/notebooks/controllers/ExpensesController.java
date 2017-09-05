@@ -22,6 +22,7 @@ import org.springframework.web.servlet.view.RedirectView;
 import javax.validation.constraints.NotNull;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.stream.Collectors;
 
 /**
  * Expenses controller.
@@ -103,9 +104,13 @@ public class ExpensesController {
             service.create(notebook, expense.getValue(), expense.categoryId,
                     StringUtils.unsafeToDate(expense.getDate(), "yyyy-MM-dd", logger),
                     StringUtils.split(expense.getTagCodes(), ","),
+                    StringUtils.split(expense.getBudgetIds(), ",").stream().map(id -> Integer.parseInt(id)).collect(Collectors.toSet()),
                     expense.getNotes(), user);
         } catch (DataNotFoundException e) {
             attributes.addFlashAttribute("error", "Data not found!");
+            return new ModelAndView(new RedirectView("/notebooks/" + notebook.getCode() + "/expenses"));
+        } catch (NumberFormatException e) {
+            attributes.addFlashAttribute("error", "Invalid budget id!");
             return new ModelAndView(new RedirectView("/notebooks/" + notebook.getCode() + "/expenses"));
         }
 

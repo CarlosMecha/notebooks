@@ -78,7 +78,7 @@ public class BudgetService {
     public List<Budget> getAll(String notebookCode) {
         logger.debug("Looking for all budgets.");
         return ListUtils.toList(repository.findAllByNotebookCode(notebookCode,
-                new PageRequest(0, 1000, Sort.Direction.ASC, "start_on")));
+                new PageRequest(0, 1000, Sort.Direction.ASC, "startOn")));
     }
 
 }

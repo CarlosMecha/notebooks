@@ -54,7 +54,7 @@ public class BudgetsController {
      * Shows all expenses.
      * @return Template name.
      */
-    @GetMapping("/{id: \\d+}")
+    @GetMapping("/{id}")
     public ModelAndView get(@PathVariable("id") int id, Notebook notebook, User user) {
 
         Optional<Budget> budget = service.get(id);
@@ -70,7 +70,7 @@ public class BudgetsController {
 
         float total = budget.get().getValue();
         for (Expense e : budget.get().getExpenses()) {
-            total -= e.getValue();
+            total += e.getValue();
         }
 
         model.addObject("total", total);

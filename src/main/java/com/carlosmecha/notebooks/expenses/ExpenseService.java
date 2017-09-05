@@ -1,5 +1,7 @@
 package com.carlosmecha.notebooks.expenses;
 
+import com.carlosmecha.notebooks.budgets.Budget;
+import com.carlosmecha.notebooks.budgets.BudgetService;
 import com.carlosmecha.notebooks.categories.Category;
 import com.carlosmecha.notebooks.categories.CategoryService;
 import com.carlosmecha.notebooks.notebooks.Notebook;
@@ -35,12 +37,14 @@ public class ExpenseService {
     private ExpenseRepository repository;
     private CategoryService categories;
     private TagService tags;
+    private BudgetService budgets;
 
     @Autowired
-    public ExpenseService(CategoryService categories, ExpenseRepository repository, TagService tags) {
+    public ExpenseService(CategoryService categories, ExpenseRepository repository, TagService tags, BudgetService budgets) {
         this.categories = categories;
         this.repository = repository;
         this.tags = tags;
+        this.budgets = budgets;
     }
 
     /**
@@ -77,7 +81,7 @@ public class ExpenseService {
      * @throws DataNotFoundException When some data is missing.
      */
     @Transactional
-    public Expense create(Notebook notebook, float value, int categoryId, Date date, Set<String> tagCodes, String note, User requester) throws DataNotFoundException {
+    public Expense create(Notebook notebook, float value, int categoryId, Date date, Set<String> tagCodes, Set<Integer> budgetIds, String note, User requester) throws DataNotFoundException {
         logger.debug("Creating expense of {}", value);
 
         Optional<Category> category = categories.get(categoryId);
@@ -90,7 +94,12 @@ public class ExpenseService {
             return (tag.isPresent()) ? tag.get() : new Tag(notebook, t);
         }).collect(Collectors.toSet());
 
-        Expense expense = new Expense(notebook, category.get(), value, date, tagSet, note, requester);
+        Set<Budget> budgetSet = budgetIds.stream().map(id -> {
+            Optional<Budget> budget = budgets.get(id.intValue());
+            return (budget.isPresent()) ? budget.get() : null;
+        }).collect(Collectors.toSet());
+
+        Expense expense = new Expense(notebook, category.get(), value, date, tagSet, budgetSet, note, requester);
         repository.save(expense);
         return expense;
     }

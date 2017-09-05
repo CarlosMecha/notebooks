@@ -41,6 +41,7 @@
                     <th>Name</th>
                     <th>Pages</th>
                     <th>Expenses</th>
+                    <th>Budgets</th>
                     <th>Notes</th>
                     <th>Created On</th>
                 </tr>
@@ -51,6 +52,7 @@
                     <td th:text="${n.name}">Name</td>
                     <td th:href="@{/notebooks/} + ${n.code} + '/pages'" class="pagesLink" >Pages</td>
                     <td th:href="@{/notebooks/} + ${n.code} + '/expenses'" class="expensesLink" >Expenses</td>
+                    <td th:href="@{/notebooks/} + ${n.code} + '/budgets'" class="budgetsLink" >Budgets</td>
                     <td>Notes</td>
                     <td th:text="${n.createdOn}">Date</td>
                 </tr>

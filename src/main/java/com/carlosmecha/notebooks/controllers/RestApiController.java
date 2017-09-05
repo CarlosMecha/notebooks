@@ -6,6 +6,8 @@ import com.carlosmecha.notebooks.notebooks.Notebook;
 import com.carlosmecha.notebooks.notebooks.NotebookService;
 import com.carlosmecha.notebooks.tags.Tag;
 import com.carlosmecha.notebooks.tags.TagService;
+import com.carlosmecha.notebooks.budgets.Budget;
+import com.carlosmecha.notebooks.budgets.BudgetService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,12 +31,14 @@ public class RestApiController {
     private NotebookService notebooks;
     private CategoryService categories;
     private TagService tags;
+    private BudgetService budgets;
 
     @Autowired
-    public RestApiController(NotebookService notebooks, CategoryService categories, TagService tags) {
+    public RestApiController(NotebookService notebooks, CategoryService categories, TagService tags, BudgetService budgets) {
         this.notebooks = notebooks;
         this.categories = categories;
         this.tags = tags;
+        this.budgets = budgets;
     }
 
     /**
@@ -64,4 +68,12 @@ public class RestApiController {
         return tags.getAll(notebookCode);
     }
 
+    /**
+     * Retrieves all stored budgets.
+     * @return List of budgets.
+     */
+    @RequestMapping("/{notebookCode}/budgets")
+    public List<Budget> getBudgets(@PathVariable("notebookCode") String notebookCode) {
+        return budgets.getAll(notebookCode);
+    }
 }

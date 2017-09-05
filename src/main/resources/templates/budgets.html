@@ -37,10 +37,10 @@
             </thead>
             <tbody>
                 <tr th:each="b: ${budgets}">
-                    <td th:href="@{/notebooks/} + ${n.code} + '/budgets/' + ${b.id}" class="budgetLink" th:text="${b.name}"></td>
-                    <td th:text="${n.value}">Value</td>
-                    <td th:text="${n.startOn}">Start on</td>
-                    <td th:text="${n.endOn}">End on</td>
+                    <td th:href="@{/notebooks/} + ${notebook.code} + '/budgets/' + ${b.id}" class="budgetLink" th:text="${b.name}"></td>
+                    <td th:text="${b.value}">Value</td>
+                    <td th:text="${b.startOn}">Start on</td>
+                    <td th:text="${b.endOn}">End on</td>
                 </tr>
             </tbody>
         </table>

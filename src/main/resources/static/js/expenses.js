@@ -70,7 +70,7 @@
             self.displayError("Error requesting tags to the server. Please retry it.");
         });
 
-        // Load budgets
+        // Budgets are already loaded
         var selector = self.jquery("#budgets");
         selector.prop("selectedIndex", -1);
         selector.select2();

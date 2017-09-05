@@ -44,7 +44,7 @@
                 </tr>
             </tbody>
         </table>
-        <div class="panel-footer" th:text="'Total expended ' + ${total} + ' of ' + ${budget.value}"></div>
+        <div class="panel-footer"><strong th:text="'Total: ' + *{#numbers.formatDecimal(total, 1, 2)} + ' of ' + *{#numbers.formatDecimal(budget.value, 1, 2)}"/></div>
     </div>
 
     <div th:include="fragments/footer :: footer"></div>
