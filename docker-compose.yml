@@ -1,5 +1,13 @@
 version: "2"
 services:
+  notebooks:
+    build:
+      context: .
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://database:5432/notebooks
+    image: carlosmecha/notebooks-dev:latest
+    ports: 
+      - "4444:4444"
   database:
     build:
       context: ./database
