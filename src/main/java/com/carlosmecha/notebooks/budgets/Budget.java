@@ -1,92 +1,65 @@
 package com.carlosmecha.notebooks.budgets;
 
-import com.carlosmecha.notebooks.expenses.Expense;
-import com.carlosmecha.notebooks.notebooks.Notebook;
-import com.carlosmecha.notebooks.users.User;
-
-import javax.persistence.*;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Date;
-import java.util.Set;
 
 /**
  * Budget model.
  *
  * Created by carlos on 22/01/17.
  */
-@Entity
-@Table(name = "budgets")
 public class Budget {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
-
-    @ManyToOne
-    @JoinColumn(name = "notebook_code", nullable = false, updatable = false)
-    private Notebook notebook;
-
+    private int id;
+    private String notebookCode;
     private String name;
     private float value;
-
-    @Column(name = "start_on")
     private Date startOn;
-
-    @Column(name = "end_on")
     private Date endOn;
-
-    @Column(name = "created_on")
     private Date createdOn;
-
-    @ManyToOne
-    @JoinColumn(name = "created_by", nullable = false, updatable = false)
-    private User createdBy;
-
-    @ManyToMany(cascade = CascadeType.ALL)
-    @JoinTable(name = "budget_expenses", joinColumns = {
-            @JoinColumn(name = "budget_id", nullable = false, updatable = false)
-    }, inverseJoinColumns = {
-            @JoinColumn(name = "expense_id", nullable = false, updatable = false)
-    })
-    private Set<Expense> expenses;
-
+    private String createdBy;
     private String description;
 
-    public Budget() {
+    protected Budget() {
     }
 
-    public Budget(Notebook notebook, String name, float value, Date startOn, Date endOn, String description, User createdBy) {
-        this();
-        this.notebook = notebook;
-        this.name = name;
-        this.value = value;
-        this.startOn = startOn;
-        this.endOn = endOn;
-        this.createdOn = new Date();
-        this.createdBy = createdBy;
-        this.description = description;
+    public static Budget fromRow(ResultSet row) throws SQLException {
+        //id, notebook_code, name, value, start_on, end_on, created_on, created_by, description
+        Budget budget = new Budget();
+        budget.id = row.getInt("id");
+        budget.notebookCode = row.getString("notebook_code");
+        budget.name = row.getString("name");
+        budget.value = row.getFloat("value");
+        budget.startOn = new Date(row.getTimestamp("start_on").getTime());
+        budget.endOn = new Date(row.getTimestamp("end_on").getTime());
+        budget.createdOn = new Date(row.getTimestamp("created_on").getTime());
+        budget.createdBy = row.getString("created_by");
+        budget.description = row.getString("description");
+        return budget;
     }
 
-    public Integer getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    protected void setId(int id) {
         this.id = id;
     }
 
-    public Notebook getNotebook() {
-        return notebook;
+    public String getNotebookCode() {
+        return notebookCode;
     }
 
-    public void setNotebook(Notebook notebook) {
-        this.notebook = notebook;
+    protected void setNotebookCode(String notebookCode) {
+        this.notebookCode = notebookCode;
     }
 
     public String getName() {
         return name;
     }
 
-    public void setName(String name) {
+    protected void setName(String name) {
         this.name = name;
     }
 
@@ -94,7 +67,7 @@ public class Budget {
         return value;
     }
 
-    public void setValue(float value) {
+    protected void setValue(float value) {
         this.value = value;
     }
 
@@ -102,7 +75,7 @@ public class Budget {
         return startOn;
     }
 
-    public void setStartOn(Date startOn) {
+    protected void setStartOn(Date startOn) {
         this.startOn = startOn;
     }
 
@@ -110,7 +83,7 @@ public class Budget {
         return endOn;
     }
 
-    public void setEndOn(Date endOn) {
+    protected void setEndOn(Date endOn) {
         this.endOn = endOn;
     }
 
@@ -118,31 +91,33 @@ public class Budget {
         return createdOn;
     }
 
-    public void setCreatedOn(Date createdOn) {
+    protected void setCreatedOn(Date createdOn) {
         this.createdOn = createdOn;
     }
 
-    public User getCreatedBy() {
+    public String getCreatedBy() {
         return createdBy;
     }
 
-    public void setCreatedBy(User createdBy) {
+    protected void setCreatedBy(String createdBy) {
         this.createdBy = createdBy;
-    }
-
-    public Set<Expense> getExpenses() {
-        return expenses;
-    }
-
-    public void setExpenses(Set<Expense> expenses) {
-        this.expenses = expenses;
     }
 
     public String getDescription() {
         return description;
     }
 
-    public void setDescription(String description) {
+    protected void setDescription(String description) {
         this.description = description;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return (obj.getClass().equals(Budget.class)) && ((Budget) obj).id == id; 
+    }
+
+    @Override
+    public int hashCode() {
+        return id;
     }
 }

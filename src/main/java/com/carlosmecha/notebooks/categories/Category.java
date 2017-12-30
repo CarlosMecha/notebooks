@@ -1,10 +1,7 @@
 package com.carlosmecha.notebooks.categories;
 
-import com.carlosmecha.notebooks.notebooks.Notebook;
-import com.carlosmecha.notebooks.utils.StringUtils;
-import org.hibernate.validator.constraints.NotEmpty;
-
-import javax.persistence.*;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Date;
 
 /**
@@ -12,67 +9,48 @@ import java.util.Date;
  *
  * Created by Carlos on 12/25/16.
  */
-@Entity
-@Table(name = "categories",
-    uniqueConstraints = @UniqueConstraint(columnNames = {"code", "notebook_code"}))
 public class Category {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
-
-    @NotEmpty
+    private int id;
     private String code;
-
-    @ManyToOne
-    @JoinColumn(name = "notebook_code", nullable = false, updatable = false)
-    private Notebook notebook;
-
-    @NotEmpty
+    private String notebookCode;
     private String name;
     private Date createdOn;
 
-    public Category() {
+    protected Category() {}
+
+    public static Category fromRow(ResultSet row) throws SQLException {
+        // id, code, notebook_code, name, created_on
+        Category category = new Category();
+        category.id = row.getInt("id");
+        category.code = row.getString("code");
+        category.notebookCode = row.getString("notebook_code");
+        category.name = row.getString("name");
+        category.createdOn = new Date(row.getTimestamp("created_on").getTime());
+        return category;
     }
 
-    public Category(Notebook notebook, String name) {
-        this(notebook, StringUtils.nameToCode(name), name);
-    }
-
-    public Category(Notebook notebook, String code, String name) {
-        this(notebook, code, name, new Date());
-    }
-
-    public Category(Notebook notebook, String code, String name, Date createdOn) {
-        this();
-        this.notebook = notebook;
-        this.code = code;
-        this.name = name;
-        this.createdOn = createdOn;
-    }
-
-    public Integer getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    protected void setId(int id) {
         this.id = id;
     }
 
-    public Notebook getNotebook() {
-        return notebook;
+    public String getNotebookCode() {
+        return notebookCode;
     }
 
-    public void setNotebook(Notebook notebook) {
-        this.notebook = notebook;
+    protected void setNotebookCode(String notebookCode) {
+        this.notebookCode = notebookCode;
     }
-
 
     public String getCode() {
         return code;
     }
 
-    public void setCode(String code) {
+    protected void setCode(String code) {
         this.code = code;
     }
 
@@ -80,7 +58,7 @@ public class Category {
         return name;
     }
 
-    public void setName(String name) {
+    protected void setName(String name) {
         this.name = name;
     }
 
@@ -88,13 +66,23 @@ public class Category {
         return createdOn;
     }
 
-    public void setCreatedOn(Date createdOn) {
+    protected void setCreatedOn(Date createdOn) {
         this.createdOn = createdOn;
     }
 
     @Override
     public String toString() {
         return String.format("Category %s: %s", code, name);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return (obj.getClass().equals(Category.class)) && ((Category) obj).id == id; 
+    }
+
+    @Override
+    public int hashCode() {
+        return id;
     }
 
 }

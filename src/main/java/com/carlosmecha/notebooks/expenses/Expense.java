@@ -2,11 +2,10 @@ package com.carlosmecha.notebooks.expenses;
 
 import com.carlosmecha.notebooks.budgets.Budget;
 import com.carlosmecha.notebooks.categories.Category;
-import com.carlosmecha.notebooks.notebooks.Notebook;
 import com.carlosmecha.notebooks.tags.Tag;
-import com.carlosmecha.notebooks.users.User;
 
-import javax.persistence.*;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Date;
 import java.util.Set;
 
@@ -15,84 +14,110 @@ import java.util.Set;
  *
  * Created by Carlos on 12/25/16.
  */
-@Entity
-@Table(name = "expenses")
 public class Expense {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @ManyToOne
-    @JoinColumn(name = "notebook_code", nullable = false, updatable = false)
-    private Notebook notebook;
-
-    @ManyToOne
-    @JoinColumn(name = "category_id", nullable = false)
-    private Category category;
-
+    private long id;
+    private String notebookCode;
+    private int categoryId;
     private float value;
     private Date date;
-
-    @Column(name = "created_on")
     private Date createdOn;
-
-    @Column(name = "updated_on")
     private Date updatedOn;
-
-    @ManyToOne
-    @JoinColumn(name = "created_by", nullable = false, updatable = false)
-    private User createdBy;
-
-    @ManyToMany(cascade = CascadeType.ALL)
-    @JoinTable(name = "expense_tags", joinColumns = {
-            @JoinColumn(name = "expense_id", nullable = false, updatable = false)
-    }, inverseJoinColumns = {
-            @JoinColumn(name = "tag_id", nullable = false, updatable = false)
-    })
-    private Set<Tag> tags;
-
-    @ManyToMany(cascade = CascadeType.ALL)
-    @JoinTable(name = "budget_expenses", joinColumns = {
-            @JoinColumn(name = "expense_id", nullable = false, updatable = false)
-    }, inverseJoinColumns = {
-            @JoinColumn(name = "budget_id", nullable = false, updatable = false)
-    })
-    private Set<Budget> budgets;
-
+    private String createdBy;
     private String notes;
 
-    public Expense() {
+    private Category category;
+    private Set<Tag> tags;
+    private Set<Budget> budgets;
+    
+    protected Expense() {
     }
 
-    public Expense(Notebook notebook, Category category, float value, Date date, Set<Tag> tags, Set<Budget> budgets, String notes, User createdBy) {
-        this();
-        this.notebook = notebook;
-        this.category = category;
-        this.value = value;
-        this.date = date;
-        this.tags = tags;
-        this.budgets = budgets;
-        this.notes = notes;
-        this.createdOn = new Date();
-        this.updatedOn = createdOn;
-        this.createdBy = createdBy;
+    public static Expense fromRow(ResultSet row) throws SQLException {
+        // id, notebook_code, category_id, value, date, created_on, updated_on, created_by, notes
+        Expense expense = new Expense();
+        expense.id = row.getInt("id");
+        expense.notebookCode = row.getString("notebook_code");
+        expense.categoryId = row.getInt("category_id");
+        expense.value = row.getFloat("value");
+        expense.date = new Date(row.getTimestamp("date").getTime());
+        expense.createdOn = new Date(row.getTimestamp("created_on").getTime());
+        expense.updatedOn = new Date(row.getTimestamp("updated_on").getTime());
+        expense.createdBy = row.getString("created_by");
+        expense.notes = row.getString("notes");
+        return expense;
     }
 
-    public Long getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    protected void setId(long id) {
         this.id = id;
     }
 
-    public Notebook getNotebook() {
-        return notebook;
+    public String getNotebookCode() {
+        return notebookCode;
     }
 
-    public void setNotebook(Notebook notebook) {
-        this.notebook = notebook;
+    protected void setNotebookCode(String notebookCode) {
+        this.notebookCode = notebookCode;
+    }
+
+    public int getCategoryId() {
+        return categoryId;
+    }
+
+    protected void setCategoryId(int categoryId) {
+        this.categoryId = categoryId;
+    }
+
+    public float getValue() {
+        return value;
+    }
+
+    protected void setValue(float value) {
+        this.value = value;
+    }
+
+    public Date getDate() {
+        return date;
+    }
+
+    protected void setDate(Date date) {
+        this.date = date;
+    }
+
+    public Date getCreatedOn() {
+        return createdOn;
+    }
+
+    protected void setCreatedOn(Date createdOn) {
+        this.createdOn = createdOn;
+    }
+
+    public Date getUpdatedOn() {
+        return updatedOn;
+    }
+
+    protected void setUpdatedOn(Date updatedOn) {
+        this.updatedOn = updatedOn;
+    }
+
+    public String getCreatedBy() {
+        return createdBy;
+    }
+
+    protected void setCreatedBy(String createdBy) {
+        this.createdBy = createdBy;
+    }
+
+    public String getNotes() {
+        return notes;
+    }
+
+    protected void setNotes(String notes) {
+        this.notes = notes;
     }
 
     public Category getCategory() {
@@ -101,46 +126,6 @@ public class Expense {
 
     public void setCategory(Category category) {
         this.category = category;
-    }
-
-    public float getValue() {
-        return value;
-    }
-
-    public void setValue(float value) {
-        this.value = value;
-    }
-
-    public Date getDate() {
-        return date;
-    }
-
-    public void setDate(Date date) {
-        this.date = date;
-    }
-
-    public Date getCreatedOn() {
-        return createdOn;
-    }
-
-    public void setCreatedOn(Date createdOn) {
-        this.createdOn = createdOn;
-    }
-
-    public Date getUpdatedOn() {
-        return updatedOn;
-    }
-
-    public void setUpdatedOn(Date updatedOn) {
-        this.updatedOn = updatedOn;
-    }
-
-    public User getCreatedBy() {
-        return createdBy;
-    }
-
-    public void setCreatedBy(User createdBy) {
-        this.createdBy = createdBy;
     }
 
     public Set<Tag> getTags() {
@@ -159,22 +144,14 @@ public class Expense {
         this.budgets = budgets;
     }
 
-    public String getNotes() {
-        return notes;
-    }
-
-    public void setNotes(String notes) {
-        this.notes = notes;
-    }
-
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
         builder.append("Expense ");
         builder.append(id);
         builder.append("\n");
-        builder.append(" - ");
-        builder.append(category);
+        builder.append(" - Category: ");
+        builder.append(categoryId);
         builder.append("\n");
         builder.append(" - $");
         builder.append(value);
