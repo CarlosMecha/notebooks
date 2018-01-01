@@ -1,81 +1,64 @@
 package com.carlosmecha.notebooks.pages;
 
-import com.carlosmecha.notebooks.notebooks.Notebook;
-import com.carlosmecha.notebooks.tags.Tag;
-import com.carlosmecha.notebooks.users.User;
-
-import javax.persistence.*;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Date;
 import java.util.Set;
+
+import com.carlosmecha.notebooks.tags.Tag;
 
 /**
  * Page model.
  *
  * Created by carlos on 4/01/17.
  */
-@Entity
-@Table(name = "pages")
 public class Page {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
-
-    @ManyToOne
-    @JoinColumn(name = "notebook_code", nullable = false, updatable = false)
-    private Notebook notebook;
-
+    private int id;
+    private String notebookCode;
     private Date date;
-
     private Date createdOn;
     private Date updatedOn;
-
-    @ManyToOne
-    @JoinColumn(name = "created_by", nullable = false, updatable = false)
-    private User createdBy;
-
-    @ManyToMany(cascade = CascadeType.ALL)
-    @JoinTable(name = "page_tags", joinColumns = {
-            @JoinColumn(name = "page_id", nullable = false, updatable = false)
-    }, inverseJoinColumns = {
-            @JoinColumn(name = "tag_id", nullable = false, updatable = false)
-    })
+    private String createdBy;
+    private Set<Comment> comments;
     private Set<Tag> tags;
 
-    public Page() {
+    protected Page() {
     }
 
-    public Page(Notebook notebook, Date date, User createdBy, Set<Tag> tags) {
-        this.notebook = notebook;
-        this.date = date;
-        this.createdBy = createdBy;
-        this.tags = tags;
-        Date now = new Date();
-        this.createdOn = now;
-        this.updatedOn = now;
+    public static Page fromRow(ResultSet row) throws SQLException {
+        // id, notebook_code, date, created_on, updated_on, created_by
+        Page page = new Page();
+        page.id = row.getInt("id");
+        page.notebookCode = row.getString("notebook_code");
+        page.date = new Date(row.getTimestamp("date").getTime());
+        page.createdOn = new Date(row.getTimestamp("created_on").getTime());
+        page.updatedOn = new Date(row.getTimestamp("updated_on").getTime());
+        page.createdBy = row.getString("created_by");
+        return page;
     }
 
-    public Integer getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    protected void setId(int id) {
         this.id = id;
     }
 
-    public Notebook getNotebook() {
-        return notebook;
+    public String getNotebookCode() {
+        return notebookCode;
     }
 
-    public void setNotebook(Notebook notebook) {
-        this.notebook = notebook;
+    protected void setNotebookCode(String notebookCode) {
+        this.notebookCode = notebookCode;
     }
 
     public Date getDate() {
         return date;
     }
 
-    public void setDate(Date date) {
+    protected void setDate(Date date) {
         this.date = date;
     }
 
@@ -83,7 +66,7 @@ public class Page {
         return createdOn;
     }
 
-    public void setCreatedOn(Date createdOn) {
+    protected void setCreatedOn(Date createdOn) {
         this.createdOn = createdOn;
     }
 
@@ -91,23 +74,31 @@ public class Page {
         return updatedOn;
     }
 
-    public void setUpdatedOn(Date updatedOn) {
+    protected void setUpdatedOn(Date updatedOn) {
         this.updatedOn = updatedOn;
     }
 
-    public User getCreatedBy() {
+    public String getCreatedBy() {
         return createdBy;
     }
 
-    public void setCreatedBy(User createdBy) {
+    protected void setCreatedBy(String createdBy) {
         this.createdBy = createdBy;
+    }
+
+    public Set<Comment> getComments() {
+        return comments;
+    }
+
+    protected void setComments(Set<Comment> comments) {
+        this.comments = comments;
     }
 
     public Set<Tag> getTags() {
         return tags;
     }
 
-    public void setTags(Set<Tag> tags) {
+    protected void setTags(Set<Tag> tags) {
         this.tags = tags;
     }
 }

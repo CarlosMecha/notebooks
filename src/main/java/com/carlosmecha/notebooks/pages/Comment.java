@@ -1,8 +1,7 @@
 package com.carlosmecha.notebooks.pages;
 
-import com.carlosmecha.notebooks.users.User;
-
-import javax.persistence.*;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Date;
 
 /**
@@ -10,64 +9,59 @@ import java.util.Date;
  *
  * Created by carlos on 4/01/17.
  */
-@Entity
-@Table(name = "page_comments")
 public class Comment {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
-
-    @ManyToOne
-    @JoinColumn(name = "page_id", nullable = false, updatable = false)
-    private Page page;
-
+    private int id;
+    private int pageId;
     private String content;
     private Date wroteOn;
+    private String wroteBy;
+    private int previousCommentId;
+    private int nextCommentId;
 
-    @ManyToOne
-    @JoinColumn(name = "wrote_by", nullable = false, updatable = false)
-    private User wroteBy;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "previous_comment_id")
-    private Comment previousComment;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "next_comment_id")
-    private Comment nextComment;
-
-    public Comment() {
+    protected Comment() {
     }
 
-    public Comment(Page page, String content, Date wroteOn, User wroteBy) {
-        this.page = page;
-        this.content = content;
-        this.wroteOn = wroteOn;
-        this.wroteBy = wroteBy;
+    public static Comment fromRow(ResultSet row) throws SQLException {
+        // id, page_id, content, wrote_on, wrote_by, previous_comment_id, next_comment_id
+        Comment comment = new Comment();
+        comment.id = row.getInt("id");
+        comment.pageId = row.getInt("page_id");
+        comment.content = row.getString("content");
+        comment.wroteOn = new Date(row.getTimestamp("wrote_on").getTime());
+        comment.wroteBy = row.getString("wrote_by");
+        comment.previousCommentId = row.getInt("previous_comment_id");
+        if (row.wasNull()) {
+            comment.previousCommentId = -1;
+        }
+        comment.nextCommentId = row.getInt("next_comment_id");
+        if (row.wasNull()) {
+            comment.nextCommentId = -1;
+        }
+        return comment;
     }
 
-    public Integer getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    protected void setId(int id) {
         this.id = id;
     }
 
-    public Page getPage() {
-        return page;
+    public int getPageId() {
+        return pageId;
     }
 
-    public void setPage(Page page) {
-        this.page = page;
+    protected void setPage(int pageId) {
+        this.pageId = pageId;
     }
 
     public String getContent() {
         return content;
     }
 
-    public void setContent(String content) {
+    protected void setContent(String content) {
         this.content = content;
     }
 
@@ -75,31 +69,41 @@ public class Comment {
         return wroteOn;
     }
 
-    public void setWroteOn(Date wroteOn) {
+    protected void setWroteOn(Date wroteOn) {
         this.wroteOn = wroteOn;
     }
 
-    public User getWroteBy() {
+    public String getWroteBy() {
         return wroteBy;
     }
 
-    public void setWroteBy(User wroteBy) {
+    protected void setWroteBy(String wroteBy) {
         this.wroteBy = wroteBy;
     }
 
-    public Comment getPreviousComment() {
-        return previousComment;
+    public int getPreviousCommentId() {
+        return previousCommentId;
     }
 
-    public void setPreviousComment(Comment previousComment) {
-        this.previousComment = previousComment;
+    protected void setPreviousCommentId(int previousCommentId) {
+        this.previousCommentId = previousCommentId;
     }
 
-    public Comment getNextComment() {
-        return nextComment;
+    public int getNextCommentId() {
+        return nextCommentId;
     }
 
-    public void setNextComment(Comment nextComment) {
-        this.nextComment = nextComment;
+    public void setNextCommentId(int nextCommentId) {
+        this.nextCommentId = nextCommentId;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return (obj.getClass().equals(Comment.class)) && ((Comment) obj).id == id; 
+    }
+
+    @Override
+    public int hashCode() {
+        return id;
     }
 }

@@ -36,11 +36,11 @@
                 </tr>
             </thead>
             <tbody>
-                <tr th:each="expense: ${budget.expenses}">
+                <tr th:each="expense: ${expenses}">
                     <td th:text="*{#calendars.format(expense.date,'dd MMM yyyy')}">Date</td>
                     <td th:text="*{#numbers.formatDecimal(expense.value, 1, 2)}">Value</td>
                     <td th:text="${expense.category.name}">Category</td>
-                    <td th:text="${#strings.arrayJoin(expense.tags,', ')}">Tags</td>
+                    <td th:text="${#strings.arrayJoin(tagCodes.get(expense.id),', ')}">Tags</td>
                 </tr>
             </tbody>
         </table>
