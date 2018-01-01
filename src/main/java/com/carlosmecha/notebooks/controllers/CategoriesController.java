@@ -3,6 +3,14 @@ package com.carlosmecha.notebooks.controllers;
 import com.carlosmecha.notebooks.categories.CategoryService;
 import com.carlosmecha.notebooks.notebooks.Notebook;
 import com.carlosmecha.notebooks.users.User;
+
+import java.security.Principal;
+import java.sql.Connection;
+import java.sql.SQLException;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.apache.tomcat.jdbc.pool.DataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,15 +32,16 @@ import org.springframework.web.servlet.view.RedirectView;
  */
 @Controller
 @RequestMapping("/notebooks/{notebookCode}/categories")
-public class CategoriesController {
+public class CategoriesController extends BaseController {
 
     private final static Logger logger = LoggerFactory.getLogger(CategoriesController.class);
 
     private CategoryService service;
 
     @Autowired
-    public CategoriesController(CategoryService service) {
-        this.service = service;
+    public CategoriesController(DataSource source) {
+        super(source);
+        this.service = new CategoryService();
     }
 
     /**
@@ -40,13 +49,18 @@ public class CategoriesController {
      * @return Template name.
      */
     @GetMapping
-    public ModelAndView getAll(Notebook notebook, User user) {
-        ModelAndView model = new ModelAndView("categories");
-        model.addObject("notebook", notebook);
-        model.addObject("name", user.getName());
-        model.addObject("categories", service.getAll(notebook));
-        model.addObject("category", new CategoryForm());
-        return model;
+    public ModelAndView getAll(HttpServletRequest request, Principal principal) throws SQLException {
+        try (Connection conn = getConnection()) {
+            User user = fromPrincipal(conn, principal);
+            Notebook notebook = getNotebook(conn, request);
+
+            ModelAndView model = new ModelAndView("categories");
+            model.addObject("notebook", notebook);
+            model.addObject("name", user.getName());
+            model.addObject("categories", service.getAll(conn, notebook));
+            model.addObject("category", new CategoryForm());
+            return model;
+        }
     }
 
     /**
@@ -60,19 +74,35 @@ public class CategoriesController {
     public ModelAndView create(@ModelAttribute CategoryForm category,
                          BindingResult result,
                          RedirectAttributes attributes,
-                         Notebook notebook,
-                         User user) {
-        logger.debug("User {} is trying to create category {}", user.getLoginName(), category.getName());
+                         HttpServletRequest request, 
+                         Principal principal) throws SQLException {
+        logger.debug("User {} is trying to create category {}", principal.getName(), category.getName());
 
-        if(result.hasErrors() || category.getName() == null || category.getName().isEmpty()) {
-            attributes.addFlashAttribute("error", "Error creating the category, check the information provided");
-            return new ModelAndView(new RedirectView("/notebooks/" + notebook.getCode() + "/categories"));
+        try (Connection conn = getConnection()) {
+            Notebook notebook = getNotebook(conn, request);
+
+            if(result.hasErrors() || category.getName() == null || category.getName().isEmpty()) {
+                attributes.addFlashAttribute("error", "Error creating the category, check the information provided");
+                return new ModelAndView(new RedirectView("/notebooks/" + notebook.getCode() + "/categories"));
+            }
+
+            try {
+                conn.setAutoCommit(false);
+                service.create(conn, notebook, category.getCode(), category.getName());
+                attributes.addFlashAttribute("message", "Category " + category.getName() + " created.");
+                conn.commit();
+                return new ModelAndView(new RedirectView("/notebooks/" + notebook.getCode() + "/categories"));
+            } catch (SQLException e) {
+                conn.rollback();
+                throw e;
+            } catch (Exception e) {
+                conn.rollback();
+                throw e;
+            } finally {
+                conn.setAutoCommit(true);
+            }
         }
 
-        service.create(notebook, category.getCode(), category.getName());
-        attributes.addFlashAttribute("message", "Category " + category.getName() + " created.");
-
-        return new ModelAndView(new RedirectView("/notebooks/" + notebook.getCode() + "/categories"));
     }
 
     /**

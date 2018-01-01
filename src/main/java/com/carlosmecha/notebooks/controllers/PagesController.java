@@ -8,24 +8,24 @@ import com.carlosmecha.notebooks.users.User;
 import com.carlosmecha.notebooks.utils.StringUtils;
 import com.vladsch.flexmark.html.HtmlRenderer;
 import com.vladsch.flexmark.parser.Parser;
+
+import org.apache.tomcat.jdbc.pool.DataSource;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.constraints.NotNull;
 import java.security.Principal;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -36,7 +36,7 @@ import java.util.stream.Collectors;
  */
 @Controller
 @RequestMapping("/notebooks/{notebookCode}/pages")
-public class PagesController {
+public class PagesController extends BaseController {
 
     private final static Logger logger = LoggerFactory.getLogger(PagesController.class);
 
@@ -45,8 +45,9 @@ public class PagesController {
     private HtmlRenderer renderer;
 
     @Autowired
-    public PagesController(PageService service, Parser parser, HtmlRenderer renderer) {
-        this.service = service;
+    public PagesController(DataSource source, Parser parser, HtmlRenderer renderer) {
+        super(source);
+        this.service = new PageService();
         this.parser = parser;
         this.renderer = renderer;
     }
@@ -56,12 +57,17 @@ public class PagesController {
      * @return Template name.
      */
     @GetMapping
-    public ModelAndView index(Notebook notebook, User user) {
-        ModelAndView model = new ModelAndView("pages");
-        model.addObject("name", user.getName());
-        model.addObject("notebook", notebook);
-        model.addObject("page", new PageForm());
-        return model;
+    public ModelAndView index(HttpServletRequest request, Principal principal) throws SQLException {
+        try (Connection conn = getConnection()) {
+            User user = fromPrincipal(conn, principal);
+            Notebook notebook = getNotebook(conn, request);
+
+            ModelAndView model = new ModelAndView("pages");
+            model.addObject("name", user.getName());
+            model.addObject("notebook", notebook);
+            model.addObject("page", new PageForm());
+            return model;
+        }
     }
 
     /**
@@ -75,22 +81,41 @@ public class PagesController {
     public ModelAndView create(@ModelAttribute PageForm page,
                          BindingResult result,
                          RedirectAttributes attributes,
-                         Notebook notebook, User user) {
+                         HttpServletRequest request, 
+                         Principal principal) throws SQLException {
 
-        logger.debug("User {} is trying to create page for notebook {}", user.getName(), notebook.getCode());
+        try (Connection conn = getConnection()) {
+            User user = fromPrincipal(conn, principal);
+            Notebook notebook = getNotebook(conn, request);
 
-        if(result.hasErrors()) {
-            attributes.addFlashAttribute("error", "Missing information!");
-            return new ModelAndView(new RedirectView("/notebooks/" + notebook.getCode() + "/pages"));
+            logger.debug("User {} is trying to create page for notebook {}", principal.getName(), notebook.getCode());
+
+            if(result.hasErrors()) {
+                attributes.addFlashAttribute("error", "Missing information!");
+                return new ModelAndView(new RedirectView("/notebooks/" + notebook.getCode() + "/pages"));
+            }
+
+            try {
+                conn.setAutoCommit(false);
+                service.create(conn, notebook,
+                    StringUtils.unsafeToDate(page.date, "yyyy-MM-dd", logger),
+                    StringUtils.split(page.tagCodes, ","),
+                    page.text, user);
+
+                attributes.addFlashAttribute("message", "Page created");
+                conn.commit();
+                return new ModelAndView(new RedirectView("/notebooks/" + notebook.getCode() + "/pages"));
+            } catch (SQLException e) {
+                conn.rollback();
+                throw e;
+            } catch (Exception e) {
+                conn.rollback();
+                throw e;
+            } finally {
+                conn.setAutoCommit(true);
+            }
         }
 
-        service.create(notebook,
-                StringUtils.unsafeToDate(page.date, "yyyy-MM-dd", logger),
-                StringUtils.split(page.tagCodes, ","),
-                page.text, user);
-
-        attributes.addFlashAttribute("message", "Page created");
-        return new ModelAndView(new RedirectView("/notebooks/" + notebook.getCode() + "/pages"));
     }
 
     /**
@@ -100,79 +125,86 @@ public class PagesController {
      */
     @GetMapping("/{id}")
     public ModelAndView getPage(@PathVariable("id") String pageId,
-                          Notebook notebook, User user) {
+                            HttpServletRequest request, 
+                            Principal principal) throws SQLException {
 
-        logger.debug("User {} is trying to access to notebook {}", user.getLoginName(), notebook.getCode());
+        try (Connection conn = getConnection()) {
+            User user = fromPrincipal(conn, principal);
+            Notebook notebook = getNotebook(conn, request);
+            
+            logger.debug("User {} is trying to access to notebook {}", user.getLoginName(), notebook.getCode());
 
-        ModelAndView model = new ModelAndView("page");
-        model.addObject("name", user.getName());
-        model.addObject("notebook", notebook);
+            ModelAndView model = new ModelAndView("page");
+            model.addObject("name", user.getName());
+            model.addObject("notebook", notebook);
+            
+            int id;
+            try {
+                id = Integer.parseInt(pageId);
+            } catch (NumberFormatException e) {
+                String lower = pageId.toLowerCase();
 
-        int id;
-        try {
-            id = Integer.parseInt(pageId);
-        } catch (NumberFormatException e) {
-            String lower = pageId.toLowerCase();
+                if("last".equals(lower) || "first".equals(lower)) {
+                    boolean first = "first".equals(lower);
 
-            if("last".equals(lower) || "first".equals(lower)) {
-                boolean first = "first".equals(lower);
+                    List<Integer> ids = service.getAllIds(conn, notebook);
+                    if(ids.isEmpty()) {
+                        return new ModelAndView(new RedirectView("/notebooks/" + notebook.getCode() + "/pages"));
+                    }
 
-                List<Integer> ids = service.getAllIds(notebook);
-                if(ids.isEmpty()) {
+                    int index = first ? 0 : ids.size() - 1;
+
+                    model.addObject("page", service.get(conn, ids.get(index)).get());
+                    model.addObject("comments", renderComments(service.getSortedComments(conn, ids.get(index))));
+                    if(ids.size() > 1) {
+                        if(first) {
+                            model.addObject("next", ids.get(1));
+                        } else {
+                            model.addObject("prev", ids.get(index - 1));
+                        }
+                    }
+
+                    return model;
+
+                } else {
                     return new ModelAndView(new RedirectView("/notebooks/" + notebook.getCode() + "/pages"));
                 }
+            }
 
-                int index = first ? 0 : ids.size() - 1;
-
-                model.addObject("page", service.get(ids.get(index)).get());
-                model.addObject("comments", renderComments(service.getSortedComments(ids.get(index))));
-                if(ids.size() > 1) {
-                    if(first) {
-                        model.addObject("next", ids.get(1));
-                    } else {
-                        model.addObject("prev", ids.get(index - 1));
-                    }
-                }
-
-                return model;
-
-            } else {
+            Optional<Page> page = service.get(conn, id);
+            if(!page.isPresent() || !page.get().getNotebookCode().equals(notebook.getCode())) {
+                logger.warn("Requesting an unknown page {} from the notebook {}", pageId, notebook.getCode());
                 return new ModelAndView(new RedirectView("/notebooks/" + notebook.getCode() + "/pages"));
             }
-        }
 
-        Optional<Page> page = service.get(id);
-        if(!page.isPresent() || !page.get().getNotebook().getCode().equals(notebook.getCode())) {
-            logger.warn("Requesting an unknown page {} from the notebook {}", pageId, notebook.getCode());
-            return new ModelAndView(new RedirectView("/notebooks/" + notebook.getCode() + "/pages"));
-        }
-
-        model.addObject("page", page.get());
-        model.addObject("comments", renderComments(service.getSortedComments(id)));
-        List<Integer> ids = service.getAllIds(notebook);
-        int prev = -1;
-        int i = 0;
-        while(i < ids.size()) {
-            int pId = ids.get(i);
-            if(pId == id) {
-                if(prev != -1) {
-                    model.addObject("prev", prev);
+            model.addObject("page", page.get());
+            model.addObject("comments", renderComments(service.getSortedComments(conn, id)));
+            List<Integer> ids = service.getAllIds(conn, notebook);
+            int prev = -1;
+            int i = 0;
+            while(i < ids.size()) {
+                int pId = ids.get(i);
+                if(pId == id) {
+                    if(prev != -1) {
+                        model.addObject("prev", prev);
+                    }
+                    if(i < ids.size() - 1) {
+                        model.addObject("next", ids.get(i+1));
+                    }
+                    break;
                 }
-                if(i < ids.size() - 1) {
-                    model.addObject("next", ids.get(i+1));
-                }
-                break;
+                prev = pId;
+                i++;
             }
-            prev = pId;
-            i++;
+
+            return model;
         }
 
-        return model;
     }
 
     private List<RenderedComment> renderComments(List<Comment> comments) {
         return comments.stream().map(c ->
-                new RenderedComment(c.getWroteBy().getName(), c.getWroteOn(),
+                new RenderedComment(c.getWroteBy(), c.getWroteOn(),
                         renderer.render(parser.parse(c.getContent()))))
                 .collect(Collectors.toList());
     }

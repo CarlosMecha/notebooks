@@ -1,6 +1,5 @@
 package com.carlosmecha.notebooks.utils;
 
-
 /**
  * When some data is not found.
  * Created by carlos on 15/01/17.

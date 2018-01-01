@@ -1,16 +1,15 @@
 package com.carlosmecha.notebooks;
 
-import com.carlosmecha.notebooks.authentication.UserMethodArgumentResolver;
-import com.carlosmecha.notebooks.notebooks.NotebookMethodArgumentResolver;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
-import org.springframework.web.method.support.HandlerMethodArgumentResolver;
-import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
+import org.springframework.context.annotation.Bean;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
-import java.util.List;
+import org.apache.tomcat.jdbc.pool.DataSource;
+import org.apache.tomcat.jdbc.pool.PoolProperties;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Main entrypoint for the application.
@@ -19,16 +18,27 @@ import java.util.List;
 @EntityScan(basePackageClasses = NotebooksApplication.class)
 public class NotebooksApplication extends WebMvcConfigurerAdapter {
 
-    @Autowired
-    private UserMethodArgumentResolver users;
+    private final static Logger logger = LoggerFactory.getLogger(NotebooksApplication.class);  
 
-    @Autowired
-    private NotebookMethodArgumentResolver notebooks;
-
-    @Override
-    public void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
-        argumentResolvers.add(users);
-        argumentResolvers.add(notebooks);
+    @Bean
+    public DataSource dataSource(DatabaseConfiguration config) {
+        
+        PoolProperties p = new PoolProperties();
+        p.setUrl(config.getUrl());
+        p.setDriverClassName("org.postgresql.Driver");
+        p.setUsername(config.getUsername());
+        p.setPassword(config.getPassword());
+        p.setTestOnBorrow(true);
+        p.setValidationQuery("SELECT 1");
+        p.setMaxActive(5);
+        p.setMaxIdle(5);
+        p.setInitialSize(1);
+        p.setMinIdle(1);
+        p.setLogAbandoned(true);
+        p.setRemoveAbandoned(true);
+        DataSource datasource = new DataSource();
+        datasource.setPoolProperties(p);
+        return datasource;
     }
 
     public static void main(String[] args) {

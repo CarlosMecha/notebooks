@@ -1,7 +1,8 @@
 package com.carlosmecha.notebooks.controllers;
 
-import com.carlosmecha.notebooks.notebooks.NotebookService;
 import com.carlosmecha.notebooks.users.User;
+
+import org.apache.tomcat.jdbc.pool.DataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +15,10 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
 
+import java.security.Principal;
+import java.sql.Connection;
+import java.sql.SQLException;
+
 /**
  * Notebooks controller.
  * Thymeleaf and @RequestMapping don't work at class level. Fixing it.
@@ -21,15 +26,13 @@ import org.springframework.web.servlet.view.RedirectView;
  * Created by Carlos on 12/29/16.
  */
 @Controller
-public class NotebooksController {
+public class NotebooksController extends BaseController {
 
     private final static Logger logger = LoggerFactory.getLogger(NotebooksController.class);
 
-    private NotebookService service;
-
     @Autowired
-    public NotebooksController(NotebookService service) {
-        this.service = service;
+    public NotebooksController(DataSource source) {
+        super(source);
     }
 
     /**
@@ -37,12 +40,15 @@ public class NotebooksController {
      * @return Template name.
      */
     @GetMapping({"/", "/notebooks"})
-    public ModelAndView getAll(User user) {
-        ModelAndView model = new ModelAndView("notebooks");
-        model.addObject("name", user.getName());
-        model.addObject("notebook", new NotebookForm());
-        model.addObject("notebooks", service.getAll());
-        return model;
+    public ModelAndView getAll(Principal principal) throws SQLException {
+        try (Connection conn = getConnection()) {
+            User user = fromPrincipal(conn, principal);
+            ModelAndView model = new ModelAndView("notebooks");
+            model.addObject("name", user.getName());
+            model.addObject("notebook", new NotebookForm());
+            model.addObject("notebooks", notebooks.getAll(conn));
+            return model;
+        }
     }
 
     /**
@@ -56,18 +62,34 @@ public class NotebooksController {
     public ModelAndView create(@ModelAttribute NotebookForm notebook,
                          BindingResult result,
                          RedirectAttributes attributes,
-                         User user) {
-        logger.debug("User {} is trying to create notebook {}", user.getLoginName(), notebook.getName());
+                         Principal principal) throws SQLException {
+        logger.debug("User {} is trying to create notebook {}", principal.getName(), notebook.getName());
 
         if(result.hasErrors() || notebook.getName() == null || notebook.getName().isEmpty()) {
             attributes.addFlashAttribute("error", "Error creating the notebook, check the information provided");
             return new ModelAndView(new RedirectView("/notebooks"));
         }
 
-        service.create(notebook.getCode(), notebook.getName(), user);
-        attributes.addFlashAttribute("message", "Notebook " + notebook.getName() + " created.");
-
-        return new ModelAndView(new RedirectView("/notebooks"));
+        try (Connection conn = getConnection()) {
+            User user = fromPrincipal(conn, principal);
+            
+            try {
+                conn.setAutoCommit(false);
+                notebooks.create(conn, notebook.getCode(), notebook.getName(), user);
+                attributes.addFlashAttribute("message", "Notebook " + notebook.getName() + " created.");
+                conn.commit();
+            } catch (SQLException e) {
+                conn.rollback();
+                throw e;
+            } catch (Exception e) {
+                conn.rollback();
+                throw e;
+            } finally {
+                conn.setAutoCommit(true);
+            }
+            
+            return new ModelAndView(new RedirectView("/notebooks"));
+        }
     }
 
     /**
