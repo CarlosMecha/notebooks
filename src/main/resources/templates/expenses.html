@@ -24,7 +24,7 @@
 
     <div class="panel panel-default">
         <div class="panel-heading">
-            <h3 class="panel-title" th:text="${report.title} + ': ' +  *{#calendars.format(report.startDate,'dd MMM yyyy')} + ' - ' + *{#calendars.format(report.endDate,'dd MMM yyyy')}"></h3>
+            <h3 class="panel-title" th:text="${report.title}"></h3>
         </div>
         <table class="table">
             <thead>

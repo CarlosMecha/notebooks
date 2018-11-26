@@ -18,6 +18,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
@@ -38,6 +39,7 @@ public class ExpenseService {
     private final static Logger logger = LoggerFactory.getLogger(ExpenseService.class);
     private final static String selectLatest = "SELECT id, notebook_code, category_id, value, date, created_on, updated_on, created_by, notes FROM expenses WHERE notebook_code = ? ORDER BY date DESC, created_on DESC LIMIT ?";
     private final static String selectByDateRange = "SELECT id, notebook_code, category_id, value, date, created_on, updated_on, created_by, notes FROM expenses WHERE notebook_code = ? AND date >= ? AND date <= ? ORDER BY date";
+    private final static String selectByMonth = "SELECT id, notebook_code, category_id, value, date, created_on, updated_on, created_by, notes FROM expenses WHERE notebook_code = ? AND EXTRACT('month' FROM date) = ? AND EXTRACT('year' FROM date) = ? ORDER BY date";
     private final static String selectExpenseTags = "SELECT tag_id FROM expense_tags WHERE expense_id = ?";
     private final static String selectByBudget = "SELECT id, notebook_code, category_id, value, date, created_on, updated_on, created_by, notes FROM budget_expenses AS b INNER JOIN expenses AS e ON (e.id = b.expense_id) WHERE budget_id = ?";
     private final static String insert = "INSERT INTO expenses (notebook_code, category_id, value, date, created_on, updated_on, created_by, notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?) RETURNING id";
@@ -231,10 +233,63 @@ public class ExpenseService {
             stmt.setTimestamp(3, new Timestamp(endDate.getTime()));
 
             try (ResultSet result = stmt.executeQuery()) {
-                while(result.next()) {
-                    expenses.add(Expense.fromRow(result));
-                }
+                return createReportFromResults(conn, title, startDate, endDate, result);
             }
+        }
+
+    }
+
+    /**
+     * Creates a basic report with all expenses for a month and year.
+     * @param conn Connection to the database.
+     * @param notebook Notebook of the report.
+     * @param month Month (1 - 12).
+     * @param year Year.
+     * @return Report.
+     */
+    public Report createMontlyReport(Connection conn, Notebook notebook, int month, int year) throws SQLException {
+        
+        if (month < 1 || month > 12) {
+            throw new IllegalArgumentException("Month should be between 1 and 12");
+        }
+
+        if (year < 2010 || year > 2050) {
+            throw new IllegalArgumentException("Year out of valid range");
+        }
+
+        Calendar date = Calendar.getInstance();
+        date.set(Calendar.DAY_OF_MONTH, 1);
+        date.set(Calendar.MONTH, month);
+        date.set(Calendar.YEAR, year);
+        date.set(Calendar.HOUR, 0);
+        date.set(Calendar.MINUTE, 0);
+        Date from = date.getTime();
+        date = Calendar.getInstance();
+        date.set(Calendar.MONTH, month);
+        date.set(Calendar.YEAR, year);
+        date.set(Calendar.DAY_OF_MONTH, date.getActualMaximum(Calendar.DAY_OF_MONTH));
+        date.set(Calendar.HOUR, 23);
+        date.set(Calendar.MINUTE, 59);
+        Date to = date.getTime();
+        
+        try (PreparedStatement stmt = conn.prepareStatement(selectByMonth)) {
+            stmt.setString(1, notebook.getCode());
+            stmt.setInt(2, month);
+            stmt.setInt(3, year);
+
+            try (ResultSet result = stmt.executeQuery()) {
+                return createReportFromResults(conn, String.format("Monthly Report: %d/%d", month, year), from, to, result);
+            }
+        }
+
+        
+    }
+
+    private Report createReportFromResults(Connection conn, String title, Date from, Date to, ResultSet result) throws SQLException {
+
+        List<Expense> expenses = new LinkedList<>();
+        while(result.next()) {
+            expenses.add(Expense.fromRow(result));
         }
 
         // Categories
@@ -263,9 +318,9 @@ public class ExpenseService {
             Set<Integer> tagIds = new HashSet<>();
             try (PreparedStatement stmt = conn.prepareStatement(selectExpenseTags)) {
                 stmt.setLong(1, expense.getId());
-                try (ResultSet result = stmt.executeQuery()) {
-                    while(result.next()) {
-                        int tagId = result.getInt(1);
+                try (ResultSet resultTags = stmt.executeQuery()) {
+                    while(resultTags.next()) {
+                        int tagId = resultTags.getInt(1);
                         if (!reportTags.containsKey(tagId)) {
                             tagIds.add(tagId);
                         } 
@@ -291,14 +346,17 @@ public class ExpenseService {
         }
         tags.sort(Comparator.comparing(Tag::getCode));
 
+
+
         Report report = new Report();
         report.setTitle(title);
-        report.setStartDate(startDate);
-        report.setEndDate(endDate);
+        report.setStartDate(from);
+        report.setEndDate(to);
         report.setCategories(reportCategories);
         report.setTags(tags);
         report.setTotal(total);
         return report;
+
     }
 
 }

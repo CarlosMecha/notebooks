@@ -75,16 +75,7 @@ public class ExpensesController extends BaseController {
     public ModelAndView index(HttpServletRequest request, Principal principal) throws SQLException {
 
         Calendar date = Calendar.getInstance();
-        date.set(Calendar.DAY_OF_MONTH, 1);
-        date.set(Calendar.HOUR, 0);
-        date.set(Calendar.MINUTE, 0);
-        Date startDate = date.getTime();
-        date = Calendar.getInstance();
-        date.set(Calendar.DAY_OF_MONTH, date.getActualMaximum(Calendar.DAY_OF_MONTH));
-        date.set(Calendar.HOUR, 23);
-        date.set(Calendar.MINUTE, 59);
-        Date endDate = date.getTime();
-
+        
         try (Connection conn = getConnection()) {
             User user = fromPrincipal(conn, principal);
             Notebook notebook = getNotebook(conn, request);
@@ -92,7 +83,7 @@ public class ExpensesController extends BaseController {
             ModelAndView model = new ModelAndView("expenses");
             model.addObject("name", user.getName());
             model.addObject("notebook", notebook);
-            model.addObject("report", service.createReportByDateRange(conn, notebook, "Monthly", startDate, endDate));
+            model.addObject("report", service.createMontlyReport(conn, notebook, date.get(Calendar.MONTH) + 1, date.get(Calendar.YEAR)));
             model.addObject("expense", new ExpenseForm());
             model.addObject("budgets", budgets.getAll(conn, notebook.getCode()));
             return model;
