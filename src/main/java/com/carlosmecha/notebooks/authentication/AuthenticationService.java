@@ -4,6 +4,7 @@ import com.carlosmecha.notebooks.users.User;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -25,10 +26,17 @@ import javax.servlet.http.HttpServletResponse;
 public class AuthenticationService extends OncePerRequestFilter {
 
     private final static Logger logger = LoggerFactory.getLogger(AuthenticationService.class);
+    private final static String DEFAULT_USER = "default";
+    private final static String DEFAULT_EMAIL = "default@email.com";
+    private final static String DEFAULT_NAME = "Default User";
 
     private final static ThreadLocal<User> requestUser = new ThreadLocal<>();
 
-    public AuthenticationService() {}
+    private boolean disableSecurity;
+
+    public AuthenticationService(@Value("${security.disable}") boolean disableSecurity) {
+        this.disableSecurity = disableSecurity;
+    }
 
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -37,6 +45,12 @@ public class AuthenticationService extends OncePerRequestFilter {
         // Static resources
         String uri = request.getRequestURI();
         if (uri.startsWith("/js/") || uri.startsWith("/css/")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        if (disableSecurity) {
+            requestUser.set(new User(DEFAULT_USER, DEFAULT_NAME, DEFAULT_EMAIL));
             filterChain.doFilter(request, response);
             return;
         }
