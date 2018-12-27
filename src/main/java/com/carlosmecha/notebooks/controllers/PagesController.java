@@ -1,5 +1,6 @@
 package com.carlosmecha.notebooks.controllers;
 
+import com.carlosmecha.notebooks.authentication.AuthenticationService;
 import com.carlosmecha.notebooks.notebooks.Notebook;
 import com.carlosmecha.notebooks.pages.Comment;
 import com.carlosmecha.notebooks.pages.Page;
@@ -23,7 +24,6 @@ import org.springframework.web.servlet.view.RedirectView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.constraints.NotNull;
-import java.security.Principal;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.*;
@@ -57,9 +57,10 @@ public class PagesController extends BaseController {
      * @return Template name.
      */
     @GetMapping
-    public ModelAndView index(HttpServletRequest request, Principal principal) throws SQLException {
+    public ModelAndView index(HttpServletRequest request) throws SQLException {
+        User user = AuthenticationService.getRequestUser();
+
         try (Connection conn = getConnection()) {
-            User user = fromPrincipal(conn, principal);
             Notebook notebook = getNotebook(conn, request);
 
             ModelAndView model = new ModelAndView("pages");
@@ -81,14 +82,12 @@ public class PagesController extends BaseController {
     public ModelAndView create(@ModelAttribute PageForm page,
                          BindingResult result,
                          RedirectAttributes attributes,
-                         HttpServletRequest request, 
-                         Principal principal) throws SQLException {
-
+                         HttpServletRequest request) throws SQLException {
+        User user = AuthenticationService.getRequestUser();
         try (Connection conn = getConnection()) {
-            User user = fromPrincipal(conn, principal);
             Notebook notebook = getNotebook(conn, request);
 
-            logger.debug("User {} is trying to create page for notebook {}", principal.getName(), notebook.getCode());
+            logger.debug("User {} is trying to create page for notebook {}", user.getName(), notebook.getCode());
 
             if(result.hasErrors()) {
                 attributes.addFlashAttribute("error", "Missing information!");
@@ -125,11 +124,9 @@ public class PagesController extends BaseController {
      */
     @GetMapping("/{id}")
     public ModelAndView getPage(@PathVariable("id") String pageId,
-                            HttpServletRequest request, 
-                            Principal principal) throws SQLException {
-
+                            HttpServletRequest request) throws SQLException {
+        User user = AuthenticationService.getRequestUser();
         try (Connection conn = getConnection()) {
-            User user = fromPrincipal(conn, principal);
             Notebook notebook = getNotebook(conn, request);
             
             logger.debug("User {} is trying to access to notebook {}", user.getLoginName(), notebook.getCode());

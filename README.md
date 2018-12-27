@@ -7,6 +7,7 @@
 ## Run
 
 ```bash
+mvn clean package
 java -jar notebooks-<version>.jar  > `date +%Y-%m-%d-%H-%M`.log
 ```
 

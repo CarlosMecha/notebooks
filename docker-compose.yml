@@ -1,16 +1,55 @@
 version: "2"
+
+# All docker ports must run in the port 80 or redirects and links will not
+# work.
 services:
-  notebooks:
-    build:
-      context: .
-    environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://database:5432/notebooks
-    image: carlosmecha/notebooks-dev:latest
-    ports: 
-      - "4444:4444"
+
   database:
     build:
       context: ./database
     image: carlosmecha/notebooks-db-dev:latest
     ports:
       - "5432:5432"
+  
+  ssso-database:
+    image: carlosmecha/ssso-db
+    ports:
+      - "5433:5432"
+
+  # notebooks.localhost-test.com
+  notebooks:
+    build:
+      context: .
+    environment:
+      - "DATABASE_URL=jdbc:postgresql://database:5432/notebooks"
+      - "DEBUG=true"
+    image: carlosmecha/notebooks-dev:latest
+    ports: 
+      - "4444:80"
+
+  # ssso.localhost-test.com
+  ssso:
+    image: carlosmecha/ssso
+    ports:
+      - "8081:80"
+    environment:
+      - "SSSO_DB_HOST=ssso-database"
+      - "SSSO_DOMAIN=.localhost-test.com"
+      - "SSSO_DATA=/www/"
+      - "LOG_LEVEL=debug"
+    depends_on:
+      - ssso-database
+    # The database takes a while until it initializes
+    entrypoint: bash -c "while true; do ssso || sleep 1; done"
+
+  # *.localhost-test.com
+  nginx:
+    build:
+      context: ./nginx
+    image: carlosmecha/notebooks-nginx:latest
+    ports:
+      # You need sudo for this
+      - "80:80"
+    depends_on:
+      - ssso
+      - notebooks
