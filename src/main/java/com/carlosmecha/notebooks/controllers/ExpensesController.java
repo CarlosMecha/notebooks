@@ -1,5 +1,6 @@
 package com.carlosmecha.notebooks.controllers;
 
+import com.carlosmecha.notebooks.authentication.AuthenticationService;
 import com.carlosmecha.notebooks.budgets.BudgetService;
 import com.carlosmecha.notebooks.categories.Category;
 import com.carlosmecha.notebooks.categories.CategoryService;
@@ -29,7 +30,6 @@ import org.springframework.web.servlet.view.RedirectView;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.constraints.NotNull;
 
-import java.security.Principal;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Calendar;
@@ -72,12 +72,12 @@ public class ExpensesController extends BaseController {
      * @return Template name.
      */
     @GetMapping
-    public ModelAndView index(HttpServletRequest request, Principal principal) throws SQLException {
+    public ModelAndView index(HttpServletRequest request) throws SQLException {
 
         Calendar date = Calendar.getInstance();
+        User user = AuthenticationService.getRequestUser();
         
         try (Connection conn = getConnection()) {
-            User user = fromPrincipal(conn, principal);
             Notebook notebook = getNotebook(conn, request);
 
             ModelAndView model = new ModelAndView("expenses");
@@ -95,9 +95,9 @@ public class ExpensesController extends BaseController {
      * @return Template name.
      */
     @GetMapping("/latest")
-    public ModelAndView getLatest(HttpServletRequest request, Principal principal) throws SQLException {
+    public ModelAndView getLatest(HttpServletRequest request) throws SQLException {
+        User user = AuthenticationService.getRequestUser();
         try (Connection conn = getConnection()) {
-            User user = fromPrincipal(conn, principal);
             Notebook notebook = getNotebook(conn, request);
 
             ModelAndView model = new ModelAndView("latest");
@@ -142,12 +142,11 @@ public class ExpensesController extends BaseController {
     public ModelAndView create(@ModelAttribute ExpenseForm expense,
                          BindingResult result,
                          RedirectAttributes attributes,
-                         HttpServletRequest request, 
-                         Principal principal) throws SQLException {
-        logger.debug("User {} is trying to create expense {}", principal.getName(), expense.getValue());
+                         HttpServletRequest request) throws SQLException {
+        User user = AuthenticationService.getRequestUser();
+        logger.debug("User {} is trying to create expense {}", user.getName(), expense.getValue());
 
         try (Connection conn = getConnection()) {
-            User user = fromPrincipal(conn, principal);
             Notebook notebook = getNotebook(conn, request);
 
             if(result.hasErrors() || expense.categoryId < 0) {

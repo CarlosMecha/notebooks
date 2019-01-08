@@ -1,5 +1,6 @@
 package com.carlosmecha.notebooks.controllers;
 
+import com.carlosmecha.notebooks.authentication.AuthenticationService;
 import com.carlosmecha.notebooks.users.User;
 
 import org.apache.tomcat.jdbc.pool.DataSource;
@@ -15,7 +16,6 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
 
-import java.security.Principal;
 import java.sql.Connection;
 import java.sql.SQLException;
 
@@ -40,9 +40,10 @@ public class NotebooksController extends BaseController {
      * @return Template name.
      */
     @GetMapping({"/", "/notebooks"})
-    public ModelAndView getAll(Principal principal) throws SQLException {
+    public ModelAndView getAll() throws SQLException {
+        User user = AuthenticationService.getRequestUser();
+
         try (Connection conn = getConnection()) {
-            User user = fromPrincipal(conn, principal);
             ModelAndView model = new ModelAndView("notebooks");
             model.addObject("name", user.getName());
             model.addObject("notebook", new NotebookForm());
@@ -61,9 +62,9 @@ public class NotebooksController extends BaseController {
     @PostMapping({"/", "/notebooks"})
     public ModelAndView create(@ModelAttribute NotebookForm notebook,
                          BindingResult result,
-                         RedirectAttributes attributes,
-                         Principal principal) throws SQLException {
-        logger.debug("User {} is trying to create notebook {}", principal.getName(), notebook.getName());
+                         RedirectAttributes attributes) throws SQLException {
+        User user = AuthenticationService.getRequestUser();
+        logger.debug("User {} is trying to create notebook {}", user.getName(), notebook.getName());
 
         if(result.hasErrors() || notebook.getName() == null || notebook.getName().isEmpty()) {
             attributes.addFlashAttribute("error", "Error creating the notebook, check the information provided");
@@ -71,7 +72,6 @@ public class NotebooksController extends BaseController {
         }
 
         try (Connection conn = getConnection()) {
-            User user = fromPrincipal(conn, principal);
             
             try {
                 conn.setAutoCommit(false);

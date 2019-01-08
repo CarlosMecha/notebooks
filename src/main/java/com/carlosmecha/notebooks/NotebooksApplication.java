@@ -5,6 +5,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.context.annotation.Bean;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
+import org.springframework.boot.autoconfigure.security.SecurityAutoConfiguration;
 
 import org.apache.tomcat.jdbc.pool.DataSource;
 import org.apache.tomcat.jdbc.pool.PoolProperties;
@@ -14,7 +15,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Main entrypoint for the application.
  */
-@SpringBootApplication
+@SpringBootApplication(exclude={SecurityAutoConfiguration.class})
 @EntityScan(basePackageClasses = NotebooksApplication.class)
 public class NotebooksApplication extends WebMvcConfigurerAdapter {
 

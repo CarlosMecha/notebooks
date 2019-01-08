@@ -2,13 +2,19 @@
 
 ## Requirements
 - Java 1.8
-- Postgres 9.5
+- Postgres 9.6
 
-## Run
+## Run in development
 
+The `SECURITY_DISABLE=true` environment flag removes the authentication check and injects the default user. Use only for development.
 ```bash
-java -jar notebooks-<version>.jar  > `date +%Y-%m-%d-%H-%M`.log
+mvn clean package
+SECURITY_DISABLE=true java -jar notebooks-<version>.jar
 ```
+
+## SSSO
+[SSSO](https://github.com/CarlosMecha/ssso) provides authentication for Notebooks. See how you can deploy it behind a Nginx server in
+the [docker-compose](/docker-compose.yml) configuration.
 
 ### Docker database
  

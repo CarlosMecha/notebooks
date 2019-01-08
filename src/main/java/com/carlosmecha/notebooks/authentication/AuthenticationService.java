@@ -2,102 +2,81 @@ package com.carlosmecha.notebooks.authentication;
 
 import com.carlosmecha.notebooks.users.User;
 
-import org.apache.tomcat.jdbc.pool.DataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.AuthorityUtils;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.filter.OncePerRequestFilter;
 
-import java.sql.SQLException;
-import java.sql.Connection;
-import java.util.Collection;
-import java.util.Optional;
+import java.io.IOException;
+
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 /**
- * Service to retrieve user credentials from the user model.
+ * Filter that blocks any unauthorized request. This meant to be deployed
+ * behind a authentication proxy like ssso that populates the header 
+ * <code>X-Auth-User</code>.
  *
- * Created by Carlos on 12/20/16.
+ * @since 0.4
  */
 @Service
-public class AuthenticationService implements UserDetailsService {
+public class AuthenticationService extends OncePerRequestFilter {
 
     private final static Logger logger = LoggerFactory.getLogger(AuthenticationService.class);
+    private final static String DEFAULT_USER = "default";
+    private final static String DEFAULT_EMAIL = "default@email.com";
+    private final static String DEFAULT_NAME = "Default User";
 
-    private DataSource dataSource;
+    private final static ThreadLocal<User> requestUser = new ThreadLocal<>();
 
-    @Autowired
-    public AuthenticationService(DataSource dataSource) {
-        this.dataSource = dataSource;
+    private boolean disableSecurity;
+
+    public AuthenticationService(@Value("${security.disable}") boolean disableSecurity) {
+        this.disableSecurity = disableSecurity;
     }
 
-    @Override
-    public UserDetails loadUserByUsername(String loginName) throws UsernameNotFoundException {
-        logger.debug("Looking for credentials for user with name {}", loginName);
-        try (Connection conn = dataSource.getConnection()){
-            Optional<User> user = User.get(conn, loginName);
-            if(user.isPresent()) {
-                return new BasicUserDetails(user.get());
-            }
-            throw new UsernameNotFoundException("User with name " + loginName + " not found.");
-        } catch(SQLException e) {
-            logger.error("Error retriving user for authentication", e);
-            throw new RuntimeException(e);
+	@Override
+	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+			throws ServletException, IOException {
+
+        // Static resources
+        String uri = request.getRequestURI();
+        if (uri.startsWith("/js/") || uri.startsWith("/css/")) {
+            filterChain.doFilter(request, response);
+            return;
         }
-    }
 
+        if (disableSecurity) {
+            requestUser.set(new User(DEFAULT_USER, DEFAULT_NAME, DEFAULT_EMAIL));
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        String loginName = request.getHeader("X-Auth-User");
+
+        if (loginName == null || loginName.trim().length() == 0) {
+            logger.debug("Request not authenticated");
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
+            return;
+        }
+
+        String name = request.getHeader("X-Auth-User-Name");
+        String email = request.getHeader("X-Auth-User-Email");
+        
+        requestUser.set(new User(loginName, name, email));
+        filterChain.doFilter(request, response);
+    }
+    
     /**
-     * Basic implementation of credentials
+     * Retrieves the user that made the request.
+     * 
+     * @return User.
      */
-    class BasicUserDetails implements UserDetails {
-
-        private String name;
-        private String encPassword;
-
-        public BasicUserDetails(User user) {
-            this.name = user.getLoginName();
-            this.encPassword = user.getPassword();
-        }
-
-        @Override
-        public Collection<? extends GrantedAuthority> getAuthorities() {
-            return AuthorityUtils.commaSeparatedStringToAuthorityList("USER");
-        }
-
-        @Override
-        public String getPassword() {
-            return encPassword;
-        }
-
-        @Override
-        public String getUsername() {
-            return name;
-        }
-
-        @Override
-        public boolean isAccountNonExpired() {
-            return true;
-        }
-
-        @Override
-        public boolean isAccountNonLocked() {
-            return true;
-        }
-
-        @Override
-        public boolean isCredentialsNonExpired() {
-            return true;
-        }
-
-        @Override
-        public boolean isEnabled() {
-            return true;
-        }
+    public static User getRequestUser() {
+        return requestUser.get();
     }
-
 
 }

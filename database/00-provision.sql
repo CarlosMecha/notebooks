@@ -1,19 +1,11 @@
 
 -- Schema creation
 
-CREATE TABLE users (
-    login_name VARCHAR(20) PRIMARY KEY,
-    name VARCHAR(100) NOT NULL,
-    email VARCHAR(100) NOT NULL,
-    password VARCHAR(100) NOT NULL,
-    created_on TIMESTAMP NOT NULL DEFAULT now()
-);
-
 CREATE TABLE notebooks (
     code VARCHAR(20) PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
     created_on TIMESTAMP NOT NULL DEFAULT now(),
-    created_by VARCHAR(20) NOT NULL REFERENCES users(login_name)
+    created_by VARCHAR(20) NOT NULL
 );
 
 CREATE TABLE categories (
@@ -41,7 +33,7 @@ CREATE TABLE budgets (
     start_on TIMESTAMP NOT NULL,
     end_on TIMESTAMP NOT NULL,
     created_on TIMESTAMP NOT NULL DEFAULT now(),
-    created_by VARCHAR(20) NOT NULL REFERENCES users(login_name),
+    created_by VARCHAR(20) NOT NULL,
     description TEXT
 );
 
@@ -54,7 +46,7 @@ CREATE TABLE expenses (
     date TIMESTAMP NOT NULL,
     created_on TIMESTAMP NOT NULL DEFAULT now(),
     updated_on TIMESTAMP NOT NULL DEFAULT now(),
-    created_by VARCHAR(20) NOT NULL REFERENCES users(login_name),
+    created_by VARCHAR(20) NOT NULL,
     notes TEXT
 );
 
@@ -77,7 +69,7 @@ CREATE TABLE pages (
     date TIMESTAMP NOT NULL,
     created_on TIMESTAMP NOT NULL DEFAULT now(),
     updated_on TIMESTAMP NOT NULL DEFAULT now(),
-    created_by VARCHAR(20) NOT NULL REFERENCES users(login_name)
+    created_by VARCHAR(20) NOT NULL
 );
 
 CREATE TABLE page_comments (
@@ -85,7 +77,7 @@ CREATE TABLE page_comments (
     page_id INT NOT NULL REFERENCES pages(id),
     content TEXT NOT NULL,
     wrote_on TIMESTAMP NOT NULL DEFAULT now(),
-    wrote_by VARCHAR(20) NOT NULL REFERENCES users(login_name),
+    wrote_by VARCHAR(20) NOT NULL,
     previous_comment_id INT REFERENCES page_comments(id),
     next_comment_id INT REFERENCES page_comments(id)
 );

@@ -4,7 +4,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.servlet.HandlerMapping;
 
-import java.security.Principal;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Map;
@@ -14,14 +13,13 @@ import org.apache.tomcat.jdbc.pool.DataSource;
 
 import com.carlosmecha.notebooks.notebooks.Notebook;
 import com.carlosmecha.notebooks.notebooks.NotebookService;
-import com.carlosmecha.notebooks.users.User;
 
 import javax.servlet.http.HttpServletRequest;
 
 public abstract class BaseController {
 
     private DataSource source;
-    protected NotebookService notebooks; 
+    protected NotebookService notebooks;
 
     protected BaseController(DataSource source) {
         this.source = source;
@@ -30,14 +28,6 @@ public abstract class BaseController {
 
     protected Connection getConnection() throws SQLException {
         return source.getConnection();
-    }
-
-    protected User fromPrincipal(Connection conn, Principal principal) throws SQLException {
-        Optional<User> user = User.get(conn, principal.getName());
-        if(user.isPresent()) {
-            return user.get();
-        }
-        throw new ResourceNotFound("User "+ principal.getName() +" not found");
     }
 
     protected Notebook getNotebook(Connection conn, HttpServletRequest request) throws SQLException {

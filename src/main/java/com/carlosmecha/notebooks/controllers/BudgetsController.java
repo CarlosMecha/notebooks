@@ -1,5 +1,6 @@
 package com.carlosmecha.notebooks.controllers;
 
+import com.carlosmecha.notebooks.authentication.AuthenticationService;
 import com.carlosmecha.notebooks.budgets.Budget;
 import com.carlosmecha.notebooks.budgets.BudgetService;
 import com.carlosmecha.notebooks.categories.Category;
@@ -10,7 +11,6 @@ import com.carlosmecha.notebooks.notebooks.Notebook;
 import com.carlosmecha.notebooks.tags.Tag;
 import com.carlosmecha.notebooks.tags.TagService;
 import com.carlosmecha.notebooks.users.User;
-import com.carlosmecha.notebooks.utils.DataNotFoundException;
 import com.carlosmecha.notebooks.utils.StringUtils;
 import org.apache.tomcat.jdbc.pool.DataSource;
 import org.slf4j.Logger;
@@ -23,8 +23,6 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
 
-
-import java.security.Principal;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -65,9 +63,9 @@ public class BudgetsController extends BaseController {
      * @return Template name.
      */
     @GetMapping
-    public ModelAndView getAll(HttpServletRequest request, Principal principal) throws SQLException {
+    public ModelAndView getAll(HttpServletRequest request) throws SQLException {
+        User user = AuthenticationService.getRequestUser();
         try (Connection conn = getConnection()){
-            User user = fromPrincipal(conn, principal);
             Notebook notebook = getNotebook(conn, request);
 
             ModelAndView model = new ModelAndView("budgets");
@@ -84,9 +82,9 @@ public class BudgetsController extends BaseController {
      * @return Template name.
      */
     @GetMapping("/{id}")
-    public ModelAndView get(@PathVariable("id") int id, HttpServletRequest request, Principal principal) throws SQLException {
+    public ModelAndView get(@PathVariable("id") int id, HttpServletRequest request) throws SQLException {
+        User user = AuthenticationService.getRequestUser();
         try (Connection conn = getConnection()) {
-            User user = fromPrincipal(conn, principal);
             Notebook notebook = getNotebook(conn, request);
 
             Optional<Budget> budget = service.get(conn, id);
@@ -142,12 +140,11 @@ public class BudgetsController extends BaseController {
     public ModelAndView create(@ModelAttribute BudgetForm budget,
                          BindingResult result,
                          RedirectAttributes attributes,
-                         HttpServletRequest request,
-                         Principal principal) throws SQLException {
-        logger.debug("User {} is trying to create budget {}", principal.getName());
+                         HttpServletRequest request) throws SQLException {
+        User user = AuthenticationService.getRequestUser();
+        logger.debug("User {} is trying to create budget {}", user.getName());
 
         try (Connection conn = getConnection()) {
-            User user = fromPrincipal(conn, principal);
             Notebook notebook = getNotebook(conn, request);
 
             if(result.hasErrors() || budget.getValue() == 0) {

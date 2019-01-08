@@ -1,10 +1,10 @@
 package com.carlosmecha.notebooks.controllers;
 
+import com.carlosmecha.notebooks.authentication.AuthenticationService;
 import com.carlosmecha.notebooks.categories.CategoryService;
 import com.carlosmecha.notebooks.notebooks.Notebook;
 import com.carlosmecha.notebooks.users.User;
 
-import java.security.Principal;
 import java.sql.Connection;
 import java.sql.SQLException;
 
@@ -49,9 +49,9 @@ public class CategoriesController extends BaseController {
      * @return Template name.
      */
     @GetMapping
-    public ModelAndView getAll(HttpServletRequest request, Principal principal) throws SQLException {
+    public ModelAndView getAll(HttpServletRequest request) throws SQLException {
+        User user = AuthenticationService.getRequestUser();
         try (Connection conn = getConnection()) {
-            User user = fromPrincipal(conn, principal);
             Notebook notebook = getNotebook(conn, request);
 
             ModelAndView model = new ModelAndView("categories");
@@ -74,9 +74,9 @@ public class CategoriesController extends BaseController {
     public ModelAndView create(@ModelAttribute CategoryForm category,
                          BindingResult result,
                          RedirectAttributes attributes,
-                         HttpServletRequest request, 
-                         Principal principal) throws SQLException {
-        logger.debug("User {} is trying to create category {}", principal.getName(), category.getName());
+                         HttpServletRequest request) throws SQLException {
+        User user = AuthenticationService.getRequestUser();
+        logger.debug("User {} is trying to create category {}", user.getName(), category.getName());
 
         try (Connection conn = getConnection()) {
             Notebook notebook = getNotebook(conn, request);
