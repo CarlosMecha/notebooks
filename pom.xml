@@ -5,7 +5,7 @@
 
 	<groupId>com.carlosmecha</groupId>
 	<artifactId>notebooks</artifactId>
-	<version>0.4</version>
+	<version>0.5</version>
 	<packaging>jar</packaging>
 
 	<name>Notebooks</name>
@@ -14,7 +14,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>1.4.3.RELEASE</version>
+		<version>1.5.19.RELEASE</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 

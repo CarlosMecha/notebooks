@@ -10,5 +10,5 @@ RUN echo "export JAVA_HOME=/opt/java\nexport PATH=$PATH:$JAVA_HOME/bin" > /etc/p
 RUN update-alternatives --install /bin/java java $JAVA_HOME/bin/java 999999
 
 # Package installation
-ADD target/notebooks-0.4.jar /notebooks.jar
+ADD target/notebooks-0.5.jar /notebooks.jar
 CMD [ "java", "-jar", "notebooks.jar" ]
